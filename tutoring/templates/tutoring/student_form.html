@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% load static %}
+{% block head %}
+{% comment %} here will come css {% endcomment %}
+{% endblock head %}
+{% block content %}
+<div class='page-header'>
+    {% if student %}
+    <h1>Edit '{{ assignment }}' student</h1>
+    {% else %}
+    <h1>Create a new Student</h1>
+    {% endif %}
+</div>
+
+<form action="" method="post" class="form-container">
+    {% csrf_token %}
+    <table>
+        {{ form.as_table }}
+    </table>
+    <button type="submit">Submit</button>
+</form>
+{% endblock content %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %} {% load static %}
+{% block head %}
+{% comment %} here will come static files like css  {% endcomment %}
+{% endblock head %}
+{% block content %}
+<section class='assignment-container'>
+    <div class='assignment-details'>
+        <h1>{{ assignment }}</h1>
+        <h2> Learning Time: {{ assignment.start_time }} - {{ assignment.end_time }} </h2>
+        <h2>{{ assignment.goal }}</h2>
+        <p> Rate per Hour: {{ assignment.hourly_rate }} CHF </p>
+        <p>Sponsor: {{ assignment.get_sponsor_display }}</p>
+        <div class='assignment-actions'>
+            <a href="{% url "assignment-update" assignment.id %}" class="btn warn">Edit</a>
+            <a href="{% url "assignment-delete" assignment.id %}" class="btn danger">Delete</a>
+        </div>
+    </div>
+</section>
+
+<section class='sessions'>
+    <div class='subsection-title'>
+        <h2>Sessions</h2>
+    </div>
+    <h3>Add a Session</h3>
+    <form 
+    action="{% url "add-session" assignment.id %}"
+    method="post"
+    class="subsection-content"
+    autocomplete="off"
+    >
+    {% csrf_token %}
+    {{ session_form.as_p }}
+    <button type='submit' class='btn submit'>Add Session</button>
+    </form>
+    
+</section>
+{% endblock content %}
+
