@@ -13,9 +13,13 @@
         <nav>
             <ul>
                 {% if user.is_authenticated %}
+                {% if user.is_superuser %}
                 <li><a href="{% url "assignment-create" %}">Create Assignment</a></li>
+                {% endif %}
                 <li><a href="{% url "assignment-list" %}">All Assignments</a></li>
+                {% if user.is_superuser %}
                 <li><a href="{% url "student-create" %}">Add Student</a></li>
+                {% endif %}
                 <li>
                     <form id='logout-form' method="post" action="{% url "logout" %}">
                         {% csrf_token %}
