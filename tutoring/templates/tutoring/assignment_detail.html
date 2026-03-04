@@ -5,6 +5,7 @@
 {% block content %}
 <section class='assignment-container'>
     <div class='assignment-details'>
+    {% if assignment %}
         <h1>{{ assignment }}</h1>
         <h2> Learning Time: {{ assignment.start_time }} - {{ assignment.end_time }} </h2>
         <h2>{{ assignment.goal }}</h2>
@@ -14,6 +15,9 @@
             <a href="{% url "assignment-update" assignment.id %}" class="btn warn">Edit</a>
             <a href="{% url "assignment-delete" assignment.id %}" class="btn danger">Delete</a>
         </div>
+    {% else %}
+        <h1>There no Assignments created yet. create one by clicking on 'Create Assignment'</h1>
+    {% endif %}
     </div>
 </section>
 
@@ -32,7 +36,26 @@
     {{ session_form.as_p }}
     <button type='submit' class='btn submit'>Add Session</button>
     </form>
-    
+    <table>
+        <thead>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Duration</th>
+            <th>Note</th>
+            <th>Created at</th>
+        </thead>
+        <tbody>
+                {% for session in assignment.session_set.all %}
+                <tr>
+                    <td> {{ session.date }} </td>
+                    <td> {{ session.time_started }} </td>
+                    <td> {{ session.duration }} </td>
+                    <td> {{ session.note }} </td>
+                    <td> {{ session.created_at }} </td>
+                </tr>
+                {% endfor %}
+        </tbody>
+    </table>
 </section>
 {% endblock content %}
 

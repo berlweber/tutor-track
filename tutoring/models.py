@@ -34,7 +34,7 @@ class Assignment(models.Model):
     
 class Session(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
-    date = models.DateField()
+    date = models.DateTimeField()
     time_started = models.TimeField()
     duration = models.DurationField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -45,3 +45,6 @@ class Session(models.Model):
 
     def get_absolute_url(self):
         return reverse("assignment-detail", kwargs={"pk": self.pk})
+    
+    class Meta:
+        ordering = ['-date']

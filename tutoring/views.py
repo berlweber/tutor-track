@@ -3,6 +3,8 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views.generic import  ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 from .models import Assignment, Student
 from .forms import SessionForm
@@ -10,12 +12,17 @@ from .forms import SessionForm
 # Create your views here.
 class Home(LoginView):
     template_name = 'home.html'
-    
 
-class AssignmentList(ListView):
+class AssignmentList(LoginRequiredMixin, ListView):
     model = Assignment
 
-class AssignmentCreate(CreateView):
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Assignment.objects.all()
+        else:
+            return Assignment.objects.filter(tutor = self.request.user)
+
+class AssignmentCreate(LoginRequiredMixin, CreateView):
     model = Assignment
     fields = '__all__'
 
@@ -23,7 +30,7 @@ class AssignmentCreate(CreateView):
         form.instance.user = self.request.user
         return super().form_valid(form)
     
-class AssignmentDetail(DetailView):
+class AssignmentDetail(LoginRequiredMixin, DetailView):
     model = Assignment
 
     def get_context_data(self, **kwargs):
@@ -31,18 +38,19 @@ class AssignmentDetail(DetailView):
         context['session_form'] = SessionForm()
         return context
 
-class AssignmentUpdate(UpdateView):
+class AssignmentUpdate(LoginRequiredMixin, UpdateView):
     model = Assignment
     fields = ['goal', 'hourly_rate', 'sponsor', 'start_time', 'end_time']
 
-class AssignmentDelete(DeleteView):
+class AssignmentDelete(LoginRequiredMixin, DeleteView):
     model = Assignment
     success_url = reverse_lazy('assignment-list')
 
-class StudentCreate(CreateView):
+class StudentCreate(LoginRequiredMixin, CreateView):
     model = Student
     fields = '__all__'
 
+@login_required
 def add_session(request, pk):
     form = SessionForm(request.POST)
     if form.is_valid():

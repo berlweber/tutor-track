@@ -8,6 +8,10 @@
     {% comment %} here will maybe come some more header content {% endcomment %}
 </section>
 <section class="card-container">
+    {% if not assignment_list %}
+    <h2>There are no assignment for you. ask your manager to create one for you, to get started</h2>
+    {% else %}
+    
     {% for assignment in assignment_list %}
     <div class='card'>
         <a href="{% url "assignment-detail"  assignment.id %}">
@@ -20,5 +24,6 @@
         </a>
     </div>
     {% endfor %}
+    {% endif %}
 </section>
 {% endblock content %}
