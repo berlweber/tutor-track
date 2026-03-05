@@ -1,11 +1,14 @@
 {% extends "base.html" %} {% load static %}
 {% block head %}
-{% comment %} here will come css {% endcomment %}
+<link rel="stylesheet" href="{% static "css/assignments/assignment-list.css" %}">
 {% endblock head %}
 {% block content %}
 <section class='page-header'>
-    <h1>Tutoring Assinments list</h1>
+    <h1>Assinments</h1>
     {% comment %} here will maybe come some more header content {% endcomment %}
+    {% if user.is_superuser %}
+    <button class='btn'>Create Assignment</button>
+    {% endif %}
 </section>
 <section class="card-container">
     {% if not assignment_list %}
@@ -15,8 +18,9 @@
     {% for assignment in assignment_list %}
     <div class='card'>
         <a href="{% url "assignment-detail"  assignment.id %}">
-            <div card='card-content'>
-                <h2 class="card-title">{{ assignment }}</h2>
+            <h2 class='card-header'>Student: {{ assignment.student }}</h2>
+            <div class='card-content'>
+                <p>Tutor: {{ assignment.tutor }}</p>
                 <p>Learning Time: {{ assignment.start_time}} - 
                     {{ assignment.end_time }}</p>
                 <p>Learning goal: {{ assignment.goal }}</p>
