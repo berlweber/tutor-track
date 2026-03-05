@@ -1,0 +1,39 @@
+
+
+section {
+    width: 100%;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    
+    /* border: 2px solid red; */
+}
+
+.login {
+    padding: 30px;
+    width: 350px;
+    background-color: white;
+    border-radius: 15px;
+    border: 1px solid #DADFE4;
+}
+
+input {
+    height: 40px;
+    border: #E5E7EB 1px solid;
+    border-radius: 6px;
+    padding: 0 10px;
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 16px;
+}
+
+input:focus {
+    border: #2C3E50;
+}
+
+label {
+    font-weight: 500;
+    color: #374151;
+}

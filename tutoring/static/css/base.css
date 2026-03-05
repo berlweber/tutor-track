@@ -20,12 +20,13 @@ body {
     'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: 1rem;
   line-height: 1.5;
-
+  --button-bg: #2C3E50;
+  --button-bg-hover: #4c5157;
 }
 
 header {
   width: 100%;
-  background-color: #2C3E50;
+  background-color: #586169;
   color: white;
   height: 70px;
   display: flex;
@@ -54,6 +55,9 @@ ul {
   flex-grow: 1;
   font-size: 2rem;
   font-weight: bold;
+  /* border: 2px solid red; */
+  text-align: center;
+  
 }
 
 nav ul {
@@ -61,7 +65,7 @@ nav ul {
   justify-content: stretch;
   align-items: center;
   text-align: center;
-  flex-grow: 5;
+  flex-grow: 100;
   /* border: 2px solid red; */
 }
 
@@ -74,16 +78,19 @@ nav ul {
 #logout-form button {
   flex-grow: 1;
   text-decoration: none;
-  background: none;
+  /* background: none; */
   color: white;
   background-color: #2C3E50;
   border: none;
   font-family: inherit;
   cursor: pointer;
   font-size: 1rem;
+  padding: 6px 16px;
+  border: #2C3E50 solid 1px;
+  border-radius: 5px;
+  width: 100%;
+  height: 100%;
 }
-
-
 
 nav li {
   background-color: #2C3E50;
@@ -92,11 +99,22 @@ nav li {
   max-height: 70px;
   font-size: 1rem;
   width: 100%;
+  padding: 5px 8px;
+  border: #2C3E50 solid 1px;
+  border-radius: 5px;
+}
+
+nav li:hover, #logout-form button:hover {
+  background-color: var(--button-bg-hover);
+  box-shadow: 0 2px 6px rgba(44, 44, 49, 0.411)
+}
+
+nav li:active #logout-form button:active {
+  background-color: #040507;
 }
 
 li a {
   color: white;
-  background-color: #2C3E50;
   width: 100%;
   height: 100%;
   text-decoration: none;
@@ -106,7 +124,39 @@ main {
   max-width: 1100px;
   margin: 20px auto;
   padding: 0 40px;
+  text-align: center;
     /* border: 2px solid red; */
+}
+
+.btn {
+  font-size: 1rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border-width: 2px;
+  border-style: solid;
+  text-decoration: none;
+  background-color: var(--button-bg);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  margin-right: 10px;
+  color: white;
+  height: 42px;
+  width: 100%;
+}
+
+.btn:hover {
+  background-color: var(--button-bg-hover);
+  box-shadow: 0 2px 6px rgba(44, 44, 49, 0.411)
+}
+
+.btn:active {
+  background-color: #040507;
+}
+
+.submit {
+  /* color: var(--submit); */
+  border-color: var(--submit);
 }
 
 @media only screen and (min-width: 768px) {
@@ -130,7 +180,6 @@ main {
     min-height: calc(100vh - 55px);
   }
   .app-name {
-  flex-basis: 30%;
   font-size: 2rem;
   font-weight: bold;
   }
