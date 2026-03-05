@@ -3,16 +3,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
     <title>TutorTrack</title>
 {% block head %}
 {% endblock head %}
 </head>
 <body>
     <header>
+        
         <nav>
+            <p class='app-name'>Tuter-Track</p>
+            {% if user.is_authenticated %}
             <ul>
-                {% if user.is_authenticated %}
                 {% if user.is_superuser %}
                 <li><a href="{% url "assignment-create" %}">Create Assignment</a></li>
                 {% endif %}
@@ -20,16 +24,14 @@
                 {% if user.is_superuser %}
                 <li><a href="{% url "student-create" %}">Add Student</a></li>
                 {% endif %}
-                <li>
-                    <form id='logout-form' method="post" action="{% url "logout" %}">
-                        {% csrf_token %}
-                        <button type='submit'>Log out</button>
-                    </form>
-                </li>
-                {% else %}
-                <li><a href="{% url "home" %}">Login</a></li>
-                {% endif %}
             </ul>
+            <div class='logout'>
+                <form id='logout-form' method="post" action="{% url "logout" %}">
+                    {% csrf_token %}
+                    <button type='submit'>Log out</button>
+                </form>
+            </div>
+            {% endif %}
         </nav>
     </header>
     <main>
