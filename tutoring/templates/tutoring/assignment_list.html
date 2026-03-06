@@ -5,9 +5,10 @@
 {% block content %}
 <section class='page-header'>
     <h1>Assinments</h1>
+    <hr />
     {% comment %} here will maybe come some more header content {% endcomment %}
     {% if user.is_superuser %}
-    <button class='btn'>Create Assignment</button>
+    <button class='btn' onclick="location.href='{% url "assignment-create" %}'" type="button">Create Assignment</button>
     {% endif %}
 </section>
 <section class="card-container">
@@ -19,8 +20,8 @@
     <div class='card'>
         <a href="{% url "assignment-detail"  assignment.id %}">
             <h2 class='card-header'>Student: {{ assignment.student }}</h2>
+            <h2 class='card-header'>Tutor: {{ assignment.tutor }}</h2>
             <div class='card-content'>
-                <p>Tutor: {{ assignment.tutor }}</p>
                 <p>Learning Time: {{ assignment.start_time}} - 
                     {{ assignment.end_time }}</p>
                 <p>Learning goal: {{ assignment.goal }}</p>

@@ -1,14 +1,17 @@
 {% extends "base.html" %} {% load static %}
 {% block head %}
-{% comment %} here will come static files like css  {% endcomment %}
+<link rel="stylesheet" href="{% static "css/assignments/assignment-detail.css" %}">
 {% endblock head %}
 {% block content %}
+<h1>Assignment Details</h1>
+<hr>
 <section class='assignment-container'>
     <div class='assignment-details'>
     {% if assignment %}
-        <h1>{{ assignment }}</h1>
-        <h2> Learning Time: {{ assignment.start_time }} - {{ assignment.end_time }} </h2>
-        <h2>{{ assignment.goal }}</h2>
+        <h2 class='card-header'>Student: {{ assignment.student }}</h2>
+        <h2 class='card-header'>Tutor: {{ assignment.tutor }}</h2>
+        <p> Learning Time: {{ assignment.start_time }} - {{ assignment.end_time }} </p>
+        <p>{{ assignment.goal }}</p>
         <p> Rate per Hour: {{ assignment.hourly_rate }} CHF </p>
         <p>Sponsor: {{ assignment.get_sponsor_display }}</p>
         <div class='assignment-actions'>
@@ -16,7 +19,7 @@
             <a href="{% url "assignment-delete" assignment.id %}" class="btn danger">Delete</a>
         </div>
     {% else %}
-        <h1>There no Assignments created yet. create one by clicking on 'Create Assignment'</h1>
+        <h2>There no Assignments created yet. create one by clicking on 'Create Assignment'</h2>
     {% endif %}
     </div>
 </section>
@@ -24,6 +27,7 @@
 <section class='sessions'>
     <div class='subsection-title'>
         <h2>Sessions</h2>
+        <hr>
     </div>
     <h3>Add a Session</h3>
     <form 
@@ -38,11 +42,13 @@
     </form>
     <table>
         <thead>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Duration</th>
-            <th>Note</th>
-            <th>Created at</th>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Duration</th>
+                <th>Note</th>
+                <th>Created at</th>
+            </tr>
         </thead>
         <tbody>
                 {% for session in assignment.session_set.all %}

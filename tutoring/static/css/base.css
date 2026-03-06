@@ -66,6 +66,7 @@ nav ul {
   align-items: center;
   text-align: center;
   flex-grow: 100;
+  gap: 12px;
   /* border: 2px solid red; */
 }
 

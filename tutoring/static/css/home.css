@@ -36,4 +36,6 @@ input:focus {
 label {
     font-weight: 500;
     color: #374151;
+    display: block;
+    text-align: left;
 }
