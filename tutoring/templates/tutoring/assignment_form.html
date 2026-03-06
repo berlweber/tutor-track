@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% load static %}
 {% block head %}
-{% comment %} here will come css {% endcomment %}
+<link rel="stylesheet" href="{% static "css/assignments/assignment-form.css" %}">
 {% endblock head %}
 {% block content %}
 <div class='page-header'>
@@ -14,8 +14,8 @@
 <form action="" method="post" class="form-container">
     {% csrf_token %}
     <table>
-        {{ form.as_table }}
+        {{ form.as_p }}
     </table>
-    <button type="submit">Submit</button>
+    <button type="submit" class='btn'>Submit</button>
 </form>
 {% endblock content %}

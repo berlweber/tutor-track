@@ -30,7 +30,7 @@ header {
   color: white;
   height: 70px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
 }
 
@@ -57,7 +57,8 @@ ul {
   font-weight: bold;
   /* border: 2px solid red; */
   text-align: center;
-  
+  margin: 0 !important;
+  align-self: center;
 }
 
 nav ul {
