@@ -1,0 +1,43 @@
+.page-header {
+    margin-bottom: 30px;
+}
+
+.confirm-text {
+    text-align: center;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 20px;
+}
+
+strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.form {
+    max-width: 450px;
+    background-color: white;
+    border: 1px solid #DADFE4;
+    border-radius: 12px;
+    padding: 35px;
+    max-width: 420px;
+    margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.secondary {
+    background-color: #6B7280;
+    border-color: #6B7280;
+}
+
+.danger {
+    background-color: #DC2626;
+    border-color: #DC2626;
+}
+
+.danger:hover {
+    background-color: #B91C1C;
+}

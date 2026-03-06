@@ -1,12 +1,12 @@
 {% extends "base.html" %} {% load static %}
 {% block head %}
-{% comment %} css here  {% endcomment %}
+<link rel="stylesheet" href="{% static "css/assignments/confirm-delete.css" %}">
 {% endblock head %}
 {% block content %}
 <div class="page-header">
   <h1>Delete Assignment?</h1>
 </div>
-<h2>Are you sure you want to delete Assignment: "{{ object }}"?</h2>
+<h2 class='confirm-text'>Are you sure you want to delete Assignment: <strong>"{{ object }}"</strong>?</h2>
 
 <form action="" method="post" class="form">
   {% csrf_token %}
