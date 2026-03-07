@@ -1,10 +1,10 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views.generic import  ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
 
@@ -72,7 +72,7 @@ def must_be_yours(func):
     def check_and_call(request, *args, **kwargs):
         pk = kwargs["pk"]
         assignment = Assignment.objects.get(pk=pk)
-        if not (assignment.tutor.id == request.user.id) or not request.user.is_superuser: 
+        if not (assignment.tutor.id == request.user.id) and not request.user.is_superuser:
             return HttpResponse("It is not your assignment! You are not permitted to add sessions to it!",
                         content_type="application/json", status=403)
         return func(request, *args, **kwargs)

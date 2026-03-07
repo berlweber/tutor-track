@@ -6,7 +6,6 @@
 <section class='page-header'>
     <h1>Assinments</h1>
     <hr />
-    {% comment %} here will maybe come some more header content {% endcomment %}
     {% if user.is_superuser %}
     <button class='btn' onclick="location.href='{% url "assignment-create" %}'" type="button">Create Assignment</button>
     {% endif %}
