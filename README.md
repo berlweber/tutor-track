@@ -10,10 +10,10 @@ I built this project to practice building a full CRUD web application with Djang
 
 ## Getting Started
 Deployed app:  
-https://your-app-link-here.com
+https://tutor-track-9c7f1aa7eb60.herokuapp.com/
 
 Planning materials:  
-https://trello.com/your-board-link
+https://trello.com/b/rLWE4i8g/tutoring-program-manager-django-crud-app-project
 
 Main features:
 - Create, view, update, and delete assignments
