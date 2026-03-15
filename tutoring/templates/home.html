@@ -4,14 +4,14 @@
 {% endblock head %}
 
 {% block content %}
-<h1>Tutor Track</h1>
-<h2>Tutoring Program Manager</h2>
+<h1>מערכת אברכים</h1>
+<h2>האפליקציה לניהול מערכת הלימודים של אברכים עם בחורים</h2>
 <section>
     <form action="{% url "home" %}" method="post" class="login">
-        <h1>Login</h1>
+        <h1>כניסה</h1>
         {% csrf_token %} {{ form.as_p }}
         <input type="hidden" name="next" value="{{ next }}"/>
-        <button type="submit" class="btn submit">Login</button>
+        <button type="submit" class="btn submit">כניסה</button>
     </form>
 </section>
 {% endblock content %}

@@ -1,33 +1,33 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
-    <title>TutorTrack</title>
+    <title>מערכת אברכים</title>
 {% block head %}
 {% endblock head %}
 </head>
 <body>
     <header>  
         <nav>
-            <p class='app-name'>Tuter-Track</p>
+            <p class='app-name'>מערכת אברכים</p>
             {% if user.is_authenticated %}
             <ul>
                 {% if user.is_superuser %}
-                <li><a href="{% url "assignment-create" %}">Create Assignment</a></li>
+                <li><a href="{% url "assignment-create" %}">שיבוץ חדש</a></li>
                 {% endif %}
-                <li><a href="{% url "assignment-list" %}">All Assignments</a></li>
+                <li><a href="{% url "assignment-list" %}">כל השיבוצים</a></li>
                 {% if user.is_superuser %}
-                <li><a href="{% url "student-create" %}">Add Student</a></li>
+                <li><a href="{% url "student-create" %}">הוספת תלמיד</a></li>
                 {% endif %}
             </ul>
             <div class='logout'>
                 <form id='logout-form' method="post" action="{% url "logout" %}">
                     {% csrf_token %}
-                    <button type='submit'>Log out</button>
+                    <button type='submit'>יציאה</button>
                 </form>
             </div>
             {% endif %}

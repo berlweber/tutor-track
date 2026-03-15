@@ -5,9 +5,9 @@
 {% block content %}
 <div class='page-header'>
     {% if student %}
-    <h1>Edit '{{ assignment }}' student</h1>
+    <h1>עריכת '{{ assignment }}' </h1> {% comment "" %} this line still needs to be checked!!!!! {% endcomment %}
     {% else %}
-    <h1>Create a new Student</h1>
+    <h1>הוספת תלמיד</h1>
     {% endif %}
 </div>
 
@@ -16,6 +16,6 @@
     <table>
         {{ form.as_p }}
     </table>
-    <button type="submit" class='btn'>Submit</button>
+    <button type="submit" class='btn'>הוסיף תלמיד</button>
 </form>
 {% endblock content %}
