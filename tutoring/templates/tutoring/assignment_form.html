@@ -5,9 +5,9 @@
 {% block content %}
 <div class='page-header'>
     {% if assignment %}
-    <h1>Edit '{{ assignment }}' assignment</h1>
+    <h1>עריכת השיבוץ של '{{ assignment }}' </h1>
     {% else %}
-    <h1>Create a new Assignment</h1>
+    <h1>יצירת שיבוץ חדש</h1>
     {% endif %}
 </div>
 
@@ -16,6 +16,6 @@
     <table>
         {{ form.as_p }}
     </table>
-    <button type="submit" class='btn'>Submit</button>
+    <button type="submit" class='btn'>שמור</button>
 </form>
 {% endblock content %}

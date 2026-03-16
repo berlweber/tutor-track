@@ -4,30 +4,31 @@ from django.urls import reverse
 
 # Create your models here.
 class Student(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField('שם התלמיד', max_length=50)
 
     def get_absolute_url(self):
         return reverse("assignment-create")
 
     def __str__(self):
         return self.name
+
 SPONSORS = (
-    ('P', 'Parent'),
-    ('S', 'School'),
-    ('O', 'Other fund')
+    ('P', 'הורים'),
+    ('S', 'ישיבה'),
+    ('O', 'יגדל/קופה')
 )
 
 class Assignment(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    tutor = models.ForeignKey(User, on_delete=models.CASCADE)
-    goal = models.TextField()
-    hourly_rate = models.IntegerField()
-    sponsor = models.CharField(max_length=1, choices=SPONSORS, default=SPONSORS[0][0])
-    start_time = models.TimeField()
-    end_time = models.TimeField()
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name = "בחור")
+    tutor = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name = "אברך")
+    goal = models.TextField('מטרת הלימוד')
+    hourly_rate = models.IntegerField('תשלום לשעה')
+    sponsor = models.CharField('מממן', max_length=1, choices=SPONSORS, default=SPONSORS[0][0])
+    start_time = models.TimeField('זמן התחלת הלימוד היומי')
+    end_time = models.TimeField('זמן סיום')
 
     def __str__(self):
-        return f"{self.tutor} tutoring {self.student}"
+        return f"{self.tutor} לומד עם {self.student}"
     
     def get_absolute_url(self):
         return reverse("assignment-detail", kwargs={"pk": self.pk})
