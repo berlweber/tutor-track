@@ -8,12 +8,12 @@
 <section class='assignment-container'>
     <div class='assignment-details'>
     {% if assignment %}
-        <h2 class='card-header'>{{ assignment.student }} :תלמיד  </h2>
-        <h2 class='card-header'>{{ assignment.tutor }} :אברך </h2>
-        <p>{{ assignment.start_time }} - {{ assignment.end_time }}  :זמן לימוד </p>
-        <p>{{ assignment.goal }}</p>
-        <p>{{ assignment.hourly_rate }} CHF  :תעריף לשעה</p>
-        <p>{{ assignment.get_sponsor_display }} :מממן </p>
+        <h2 class='card-header'>תלמיד: {{ assignment.student }}  </h2>
+        <h2 class='card-header'>אברך: {{ assignment.tutor }} </h2>
+        <p>זמן לימוד: {{ assignment.start_time }} - {{ assignment.end_time }}  </p>
+        <p>מטרת הלימוד: {{ assignment.goal }}</p>
+        <p>תעריף לשעה:  {{ assignment.hourly_rate }}</p>
+        <p>מממן: {{ assignment.get_sponsor_display }} </p>
         <div class='assignment-actions'>
             <a href="{% url "assignment-update" assignment.id %}" class="btn warn">עריכה</a>
             <a href="{% url "assignment-delete" assignment.id %}" class="btn danger">מחיקה</a>
