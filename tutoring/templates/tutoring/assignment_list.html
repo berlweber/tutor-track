@@ -4,26 +4,26 @@
 {% endblock head %}
 {% block content %}
 <section class='page-header'>
-    <h1>Assinments</h1>
+    <h1>שיבוצים</h1>
     <hr />
     {% if user.is_superuser %}
-    <button class='btn' onclick="location.href='{% url "assignment-create" %}'" type="button">Create Assignment</button>
+    <button class='btn' onclick="location.href='{% url "assignment-create" %}'" type="button">שיבוץ חדש</button>
     {% endif %}
 </section>
 <section class="card-container">
     {% if not assignment_list %}
-    <h2>There are no assignment for you. ask your manager to create one for you, to get started</h2>
+    <h2>אין שיבוצים עבורך. בקש מהמנהל שלך ליצור אחד כדי להתחיל</h2>
     {% else %}
     
     {% for assignment in assignment_list %}
-    <div class='card'>
+    <div class='card' DIR="RTL">
         <a href="{% url "assignment-detail"  assignment.id %}">
-            <h2 class='card-header'>Student: {{ assignment.student }}</h2>
-            <h2 class='card-header'>Tutor: {{ assignment.tutor }}</h2>
+            <h2 class='card-header'>תלמיד: {{ assignment.student }} </h2>
+            <h2 class='card-header'>אברך: {{ assignment.tutor }}</h2>
             <div class='card-content'>
-                <p>Learning Time: {{ assignment.start_time}} - 
-                    {{ assignment.end_time }}</p>
-                <p>Learning goal: {{ assignment.goal }}</p>
+                <p>זמן לימוד: {{ assignment.start_time}} - 
+                    {{ assignment.end_time }} </p>
+                <p>מטרת הלימוד: {{ assignment.goal }} </p>
             </div>
         </a>
     </div>

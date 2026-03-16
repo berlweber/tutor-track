@@ -3,33 +3,33 @@
 <link rel="stylesheet" href="{% static "css/assignments/assignment-detail.css" %}">
 {% endblock head %}
 {% block content %}
-<h1>Assignment Details</h1>
+<h1>פרטי השיבוץ</h1>
 <hr>
 <section class='assignment-container'>
     <div class='assignment-details'>
     {% if assignment %}
-        <h2 class='card-header'>Student: {{ assignment.student }}</h2>
-        <h2 class='card-header'>Tutor: {{ assignment.tutor }}</h2>
-        <p> Learning Time: {{ assignment.start_time }} - {{ assignment.end_time }} </p>
+        <h2 class='card-header'>{{ assignment.student }} :תלמיד  </h2>
+        <h2 class='card-header'>{{ assignment.tutor }} :אברך </h2>
+        <p>{{ assignment.start_time }} - {{ assignment.end_time }}  :זמן לימוד </p>
         <p>{{ assignment.goal }}</p>
-        <p> Rate per Hour: {{ assignment.hourly_rate }} CHF </p>
-        <p>Sponsor: {{ assignment.get_sponsor_display }}</p>
+        <p>{{ assignment.hourly_rate }} CHF  :תעריף לשעה</p>
+        <p>{{ assignment.get_sponsor_display }} :מממן </p>
         <div class='assignment-actions'>
-            <a href="{% url "assignment-update" assignment.id %}" class="btn warn">Edit</a>
-            <a href="{% url "assignment-delete" assignment.id %}" class="btn danger">Delete</a>
+            <a href="{% url "assignment-update" assignment.id %}" class="btn warn">עריכה</a>
+            <a href="{% url "assignment-delete" assignment.id %}" class="btn danger">מחיקה</a>
         </div>
     {% else %}
-        <h2>There no Assignments created yet. create one by clicking on 'Create Assignment'</h2>
+        <h2>עדיין לא נוצרו שיבוצים. לחץ על "שיבוץ חדש" כדי להתחיל.</h2>
     {% endif %}
     </div>
 </section>
 
 <section class='sessions'>
     <div class='subsection-title'>
-        <h2>Sessions</h2>
+        <h2>שיעורים</h2>
         <hr>
     </div>
-    <h3>Add a Session</h3>
+    <h3>הוספת שיעור</h3>
     <form 
     action="{% url "add-session" assignment.id %}"
     method="post"
@@ -38,17 +38,17 @@
     >
     {% csrf_token %}
     {{ session_form.as_p }}
-    <button type='submit' class='btn submit'>Add Session</button>
+    <button type='submit' class='btn submit'>הוסיף שיעור</button>
     </form>
-    <h3>Past Sessions</h3>
-    <table>
+    <h3>שיעורים קודמים</h3>
+    <table DIR="RTL">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Duration</th>
-                <th>Note</th>
-                <th>Created at</th>
+                <th>תעריך</th>
+                <th>זמן</th>
+                <th>משך</th>
+                <th>הערה</th>
+                <th>נוצר בתאריך</th>
             </tr>
         </thead>
         <tbody>
