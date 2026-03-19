@@ -1,0 +1,96 @@
+{% extends "base.html" %} {% load static %}
+{% block head %}
+{% comment %} here will come css link  {% endcomment %}
+{% endblock head %}
+{% block content %}
+<h1>לוח הסיכומים</h1>
+<section class="global-summary">
+<h2>סה"כ לתשלום החודש:</h2>
+<p><b>ישיבה:</b> {{ school_total_cost }}</p>
+<p><b>הורים:</b> {{ parents_total_cost }}</p>
+<p><b>קופה אחר:</b> {{ fund_total_cost }}</p>
+<br>
+<p><b>סה"כ כללי:</b> {{ grand_total }}</p>
+</section>
+<section>
+<h2>סה"כ ישיבה</h2>
+<p><b>סה"כ:</b> {{ school_total_cost }}</p>
+<table>
+    <thead>
+        <tr>
+            <th>הבה"ח</th>
+            <th>אברך</th>
+            <th>שעות</th>
+            <th>סכום</th>
+            <th>יעד הלימוד</th>
+            {% comment %} <th></th> {% endcomment %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for assignment in school_assignments %}
+        <tr>
+            <td> {{ assignment.student }} </td>
+            <td> {{ assignment.tutor }} </td>
+            <td> {{ assignment.total_hours }} </td>
+            <td> {{ assignment.total_earnings }} </td>
+            <td> {{ assignment.goal }} </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</section>
+<section>
+<h2>סה"כ הורים</h2>
+<p><b>סה"כ:</b> {{ parents_total_cost }}</p>
+<table>
+    <thead>
+        <tr>
+            <th>הבה"ח</th>
+            <th>אברך</th>
+            <th>שעות</th>
+            <th>סכום</th>
+            <th>יעד הלימוד</th>
+            {% comment %} <th></th> {% endcomment %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for assignment in parents_assignments %}
+        <tr>
+            <td> {{ assignment.student }} </td>
+            <td> {{ assignment.tutor }} </td>
+            <td> {{ assignment.total_hours }} </td>
+            <td> {{ assignment.total_earnings }} </td>
+            <td> {{ assignment.goal }} </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</section>
+<section>
+<h2>סה"כ קופה אחר</h2>
+<p><b>סה"כ:</b> {{ fund_total_cost }}</p>
+<table>
+    <thead>
+        <tr>
+            <th>הבה"ח</th>
+            <th>אברך</th>
+            <th>שעות</th>
+            <th>סכום</th>
+            <th>יעד הלימוד</th>
+            {% comment %} <th></th> {% endcomment %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for assignment in fund_assignments %}
+        <tr>
+            <td> {{ assignment.student }} </td>
+            <td> {{ assignment.tutor }} </td>
+            <td> {{ assignment.total_hours }} </td>
+            <td> {{ assignment.total_earnings }} </td>
+            <td> {{ assignment.goal }} </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</section>
+{% endblock content %}

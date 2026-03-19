@@ -19,5 +19,16 @@ class SessionForm(forms.ModelForm):
                     'type': 'date',
                     'placeholder': 'תבחר תאריך'
                 }
+            ),
+            'time_started': forms.TimeInput(
+                attrs = {
+                    'type': 'time',
+                }
+            ),
+            'duration': forms.TimeInput(
+                attrs = {
+                    'type': 'time',
+                    'placeholder': '00:00'
+                }
             )
         }

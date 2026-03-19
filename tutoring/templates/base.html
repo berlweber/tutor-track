@@ -20,6 +20,7 @@
                 <li><a href="{% url "assignment-create" %}">שיבוץ חדש</a></li>
                 {% endif %}
                 <li><a href="{% url "assignment-list" %}">כל השיבוצים</a></li>
+                <li><a href="{% url "dashboard" %}">לוח סיכום</a></li>
                 {% if user.is_superuser %}
                 <li><a href="{% url "student-create" %}">הוספת תלמיד</a></li>
                 {% endif %}

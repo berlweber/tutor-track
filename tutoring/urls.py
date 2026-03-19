@@ -10,4 +10,5 @@ urlpatterns = [
     path('assignment/<int:pk>/update/', views.AssignmentUpdate.as_view(), name='assignment-update'),
     path('assignment/<int:pk>/delete/', views.AssignmentDelete.as_view(), name='assignment-delete'),
     path('student/create', views.StudentCreate.as_view(), name='student-create'),
+    path('assignments/dashboard/', views.dashboard, name='dashboard'),
 ]
