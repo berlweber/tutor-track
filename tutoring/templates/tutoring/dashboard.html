@@ -1,9 +1,20 @@
 {% extends "base.html" %} {% load static %}
 {% block head %}
 {% comment %} here will come css link  {% endcomment %}
+<style>
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, auto)); /* Auto sizing columns */
+}
+.grid-row {
+  display: grid;
+  grid-template-columns: subgrid; /* New feature, makes row inherit parents grid */
+  grid-column: 1 / -1; /* make row span full grid */
+}
+</style>
 {% endblock head %}
 {% block content %}
-<h1>לוח הסיכומים</h1>
+<h1>לוח הסיכום</h1>
 <section class="global-summary">
 <h2>סה"כ לתשלום החודש:</h2>
 <p><b>ישיבה:</b> {{ school_total_cost }}</p>
@@ -13,84 +24,67 @@
 <p><b>סה"כ כללי:</b> {{ grand_total }}</p>
 </section>
 <section>
-<h2>סה"כ ישיבה</h2>
+<h2>ישיבה</h2>
 <p><b>סה"כ:</b> {{ school_total_cost }}</p>
-<table>
-    <thead>
-        <tr>
-            <th>הבה"ח</th>
-            <th>אברך</th>
-            <th>שעות</th>
-            <th>סכום</th>
-            <th>יעד הלימוד</th>
-            {% comment %} <th></th> {% endcomment %}
-        </tr>
-    </thead>
-    <tbody>
+
+    <div class="grid">
+        <div>הבה"ח</div>
+        <div>אברך</div>
+        <div>שעות</div>
+        <div>סכום</div>
+        <div>יעד הלימוד</div>
         {% for assignment in school_assignments %}
-        <tr>
-            <td> {{ assignment.student }} </td>
-            <td> {{ assignment.tutor }} </td>
-            <td> {{ assignment.total_hours }} </td>
-            <td> {{ assignment.total_earnings }} </td>
-            <td> {{ assignment.goal }} </td>
-        </tr>
+        <a href="{% url "assignment-detail" assignment.id %}" 
+        class="grid-row">
+            <div> {{ assignment.student }} </div>
+            <div> {{ assignment.tutor }} </div>
+            <div> {{ assignment.total_hours }} </div>
+            <div> {{ assignment.total_earnings }} </div>
+            <div> {{ assignment.goal }} </div>
+        </a>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
 </section>
 <section>
-<h2>סה"כ הורים</h2>
-<p><b>סה"כ:</b> {{ parents_total_cost }}</p>
-<table>
-    <thead>
-        <tr>
-            <th>הבה"ח</th>
-            <th>אברך</th>
-            <th>שעות</th>
-            <th>סכום</th>
-            <th>יעד הלימוד</th>
-            {% comment %} <th></th> {% endcomment %}
-        </tr>
-    </thead>
-    <tbody>
+    <h2>הורים</h2>
+    <p><b>סה"כ:</b> {{ parents_total_cost }}</p>
+    <div class="grid">
+        <div>הבה"ח</div>
+        <div>אברך</div>
+        <div>שעות</div>
+        <div>סכום</div>
+        <div>יעד הלימוד</div>
         {% for assignment in parents_assignments %}
-        <tr>
-            <td> {{ assignment.student }} </td>
-            <td> {{ assignment.tutor }} </td>
-            <td> {{ assignment.total_hours }} </td>
-            <td> {{ assignment.total_earnings }} </td>
-            <td> {{ assignment.goal }} </td>
-        </tr>
+        <a href="{% url "assignment-detail" assignment.id %}" 
+        class="grid-row">
+            <div> {{ assignment.student }} </div>
+            <div> {{ assignment.tutor }} </div>
+            <div> {{ assignment.total_hours }} </div>
+            <div> {{ assignment.total_earnings }} </div>
+            <div> {{ assignment.goal }} </div>
+        </a>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
 </section>
 <section>
-<h2>סה"כ קופה אחר</h2>
+<h2>קופה אחר</h2>
 <p><b>סה"כ:</b> {{ fund_total_cost }}</p>
-<table>
-    <thead>
-        <tr>
-            <th>הבה"ח</th>
-            <th>אברך</th>
-            <th>שעות</th>
-            <th>סכום</th>
-            <th>יעד הלימוד</th>
-            {% comment %} <th></th> {% endcomment %}
-        </tr>
-    </thead>
-    <tbody>
+    <div class="grid">
+        <div>הבה"ח</div>
+        <div>אברך</div>
+        <div>שעות</div>
+        <div>סכום</div>
+        <div>יעד הלימוד</div>
         {% for assignment in fund_assignments %}
-        <tr>
-            <td> {{ assignment.student }} </td>
-            <td> {{ assignment.tutor }} </td>
-            <td> {{ assignment.total_hours }} </td>
-            <td> {{ assignment.total_earnings }} </td>
-            <td> {{ assignment.goal }} </td>
-        </tr>
+        <a href="{% url "assignment-detail" assignment.id %}" 
+        class="grid-row">
+            <div> {{ assignment.student }} </div>
+            <div> {{ assignment.tutor }} </div>
+            <div> {{ assignment.total_hours }} </div>
+            <div> {{ assignment.total_earnings }} </div>
+            <div> {{ assignment.goal }} </div>
+        </a>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
 </section>
 {% endblock content %}
