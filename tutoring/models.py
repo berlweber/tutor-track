@@ -35,7 +35,7 @@ class Assignment(models.Model):
     
 class Session(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
-    date = models.DateTimeField()
+    date = models.DateField()
     time_started = models.TimeField()
     duration = models.DurationField()
     created_at = models.DateTimeField(auto_now_add=True)
