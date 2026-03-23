@@ -15,8 +15,38 @@
 {% endblock head %}
 {% block content %}
 <h1>לוח הסיכום</h1>
+<h2>סיכום של חודש {{month}} - {{year}}</h2>
+
+<form 
+    action="{% url "dashboard" %}"
+    method="get"
+    >
+    {% csrf_token %}
+    {{ month_picker.as_p }}
+    <button type='submit'>שלח</button>
+</form>
+
+{% comment %} <form 
+    action='{% url "dashboard-archive" year=year-picker month=month-picker %}'
+    id='month-picker-form'>
+    <label for="year-picker">תבחר חודש</label>
+    <select name="year-picker" id="year-picker">
+        {% for year in years %} 
+        <option value="{{year}}">{{year}}</option>
+        {% endfor %}
+    </select>
+
+    <label for="month-picker">תבחר חודש</label>
+    <select name="month-picker" id="month-picker">
+        {% for month in months %} 
+        <option value="{{month.0}}">{{month.1}}</option>
+        {% endfor %}
+    </select>
+    <button type='submit'>שלח</button>
+</form> {% endcomment %}
+
 <section class="global-summary">
-<h2>סה"כ לתשלום החודש:</h2>
+<h2>סה"כ לתשלום לפי מממן:</h2>
 <p><b>ישיבה:</b> {{ school_total_cost }}</p>
 <p><b>הורים:</b> {{ parents_total_cost }}</p>
 <p><b>קופה אחר:</b> {{ fund_total_cost }}</p>

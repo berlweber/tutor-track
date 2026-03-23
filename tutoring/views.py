@@ -1,3 +1,6 @@
+
+from doctest import debug
+
 from django.shortcuts import redirect, render
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
@@ -7,10 +10,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
-import datetime
+import datetime, calendar
 
 from .models import Assignment, Student, Session
-from .forms import SessionForm
+from .forms import SessionForm, MonthPickerForm
 
 # Create your views here.
 class Home(LoginView):
@@ -90,8 +93,11 @@ def add_session(request, pk):
         new_session.save()
     return redirect('assignment-detail', pk=pk)
 
-def calculate_totals(assignment):
-    sessions = Session.objects.filter(assignment__id=assignment.id)
+def calculate_totals(assignment, month, year):
+    if month == 'all':
+        sessions = Session.objects.filter(assignment__id=assignment.id) ## add a aggregation to return ordered by month for details page
+    else:
+        sessions = Session.objects.filter(assignment__id=assignment.id).filter(date__month=month).filter(date__year=year)
     # create a list and fill it with all the timedelta's /duration in a second's format, which counnts as here as minutes
     durations_list = []
     for session in sessions:
@@ -106,14 +112,18 @@ def calculate_totals(assignment):
 
     return assignment
 
-        # breakpoint()
-
-# assignments = Assignment.objects.all()
-# calculate_totals_for_sponsors(assignments)
-# print('printing', sessions[1].duration + sessions[2].duration)
-
 @login_required
 def dashboard(request):
+    month=datetime.datetime.now().month
+    year=datetime.datetime.now().year
+
+    if request.method == 'GET':
+        form = MonthPickerForm(request.GET)
+        if form.is_valid():
+            date_value = form.cleaned_data["month"]
+            year = date_value.year
+            month = date_value.month
+
     assignments = ''
     if request.user.is_superuser:
         assignments = Assignment.objects.all()
@@ -127,7 +137,7 @@ def dashboard(request):
     parents_total_cost = 0
     fund_total_cost = 0
     for assignment in assignments:
-        assignment = calculate_totals(assignment)
+        assignment = calculate_totals(assignment, month, year)
         if assignment.sponsor == 'S':
             school_assignments.append(assignment)
             school_total_cost = school_total_cost + assignment.total_earnings
@@ -147,5 +157,8 @@ def dashboard(request):
         'school_total_cost': school_total_cost,
         'parents_total_cost': parents_total_cost,
         'fund_total_cost': fund_total_cost,
-        'grand_total': grand_total
+        'grand_total': grand_total,
+        'month': calendar.month_name[month],
+        'year': year,
+        'month_picker': MonthPickerForm()
     })

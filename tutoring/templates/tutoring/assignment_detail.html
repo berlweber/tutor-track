@@ -13,13 +13,13 @@
         <p>זמן לימוד: {{ assignment.start_time }} - {{ assignment.end_time }}  </p>
         <p>מטרת הלימוד: {{ assignment.goal }}</p>
         <p>תעריף לשעה:  {{ assignment.hourly_rate }}</p>
-        <p>מממן: {{ assignment.get_sponsor_display }} </p>
+        <p>ממומן ע"י: {{ assignment.get_sponsor_display }} </p>
         <div class='assignment-actions'>
             <a href="{% url "assignment-update" assignment.id %}" class="btn warn">עריכה</a>
             <a href="{% url "assignment-delete" assignment.id %}" class="btn danger">מחיקה</a>
         </div>
     {% else %}
-        <h2>עדיין לא נוצרו שיבוצים. לחץ על "שיבוץ חדש" כדי להתחיל.</h2>
+        <h2>עדיין לא נרשם שיבוצים. לחץ על "שיבוץ חדש" כדי להתחיל.</h2>
     {% endif %}
     </div>
 </section>
@@ -44,11 +44,11 @@
     <table DIR="RTL">
         <thead>
             <tr>
-                <th>תעריך</th>
-                <th>זמן</th>
+                <th>תאריך הלימוד</th>
+                <th>זמן התחלה</th>
                 <th>משך</th>
                 <th>הערה</th>
-                <th>נוצר בתאריך</th>
+                <th>נרשם בתאריך</th>
             </tr>
         </thead>
         <tbody>

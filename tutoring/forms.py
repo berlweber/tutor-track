@@ -32,3 +32,11 @@ class SessionForm(forms.ModelForm):
                 }
             )
         }
+    
+class MonthPickerForm(forms.Form):
+    
+    month = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "month"}),
+        input_formats=["%Y-%m"],  
+    )
+        
