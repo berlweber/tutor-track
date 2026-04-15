@@ -110,6 +110,7 @@ class SessionForm(forms.ModelForm):
                     "data-picker-type": "date",
                 },
             ),
+            "note": forms.Textarea(attrs={"rows": 3, "class": "session-note"}),
         }
 
     def __init__(self, *args, **kwargs):

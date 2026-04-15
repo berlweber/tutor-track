@@ -48,6 +48,10 @@ textarea {
   min-height: 8.5rem;
 }
 
+textarea.session-note {
+  min-height: 4.25rem !important;
+}
+
 @media (max-width: 640px) {
   .form-actions .btn {
     width: 100%;
