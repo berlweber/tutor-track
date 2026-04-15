@@ -5,17 +5,23 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Rubik:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+    <link rel="stylesheet" href="{% static 'css/hebrew-pickers.css' %}" />
     <title>מלמד פרטי</title>
 {% block head %}
 {% endblock head %}
 </head>
 <body>
-    <header>  
-        <nav>
+    <header class="site-header">  
+        <nav class="site-nav">
             <p class='app-name'>מלמד פרטי</p>
             {% if user.is_authenticated %}
-            <ul>
+            <ul class="nav-links">
                 {% if user.is_superuser %}
                 <li><a href="{% url "assignment-create" %}">שיבוץ חדש</a></li>
                 {% endif %}
@@ -34,9 +40,13 @@
             {% endif %}
         </nav>
     </header>
-    <main>
+    <main class="site-main">
         {% block content %}
         {% endblock content %}
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/he.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+    <script src="{% static 'js/hebrew-ui.js' %}"></script>
 </body>
 </html>

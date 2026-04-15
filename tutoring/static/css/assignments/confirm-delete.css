@@ -1,43 +1,48 @@
-.page-header {
-    margin-bottom: 30px;
-}
-
 .confirm-text {
-    text-align: center;
-    font-weight: 500;
-    color: #374151;
-    margin-bottom: 20px;
+  max-width: 42rem;
+  margin: 0 auto 1.5rem;
+  color: var(--muted);
+  font-family: "Assistant", sans-serif;
+  font-size: 1.2rem;
 }
 
-strong {
-    color: #111827;
-    font-weight: 600;
+.confirm-text strong {
+  color: var(--text);
 }
 
 .form {
-    max-width: 450px;
-    background-color: white;
-    border: 1px solid #DADFE4;
-    border-radius: 12px;
-    padding: 35px;
-    max-width: 420px;
-    margin: 30px auto;
-    display: flex;
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 1.7rem;
+  background: linear-gradient(180deg, rgba(255, 253, 249, 0.97), rgba(251, 247, 241, 0.97));
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-soft);
+  text-align: right;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.confirm-actions .btn {
+  display: flex;
+  margin-top: 0;
+  flex: 0 0 9.5rem;
+  width: 9.5rem;
+}
+
+@media (max-width: 640px) {
+  .confirm-actions {
     flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
+  }
 
-.secondary {
-    background-color: #6B7280;
-    border-color: #6B7280;
-}
-
-.danger {
-    background-color: #DC2626;
-    border-color: #DC2626;
-}
-
-.danger:hover {
-    background-color: #B91C1C;
+  .confirm-actions .btn {
+    width: 100%;
+    flex-basis: 100%;
+  }
 }

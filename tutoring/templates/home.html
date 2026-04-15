@@ -4,15 +4,17 @@
 {% endblock head %}
 
 {% block content %}
-<h1>מלמד פרטי</h1>
-<h2>ניהול מערכת הלימוד הפרטי של אברכים עם בחורים</h2>
-<section>
+<section class="hero-section">
+    <div class="hero-copy">
+        <p class="hero-kicker">ניהול חכם של מערך הלימוד</p>
+        <h1>מלמד פרטי</h1>
+        <h2>מערכת מסודרת לניהול שיבוצים, שיעורים, תשלומים ודיווח חודשי לאברכים ולבחורים.</h2>
+    </div>
     <form action="{% url "home" %}" method="post" class="login">
-        <h1>כניסה</h1>
+        <h1>כניסה למערכת</h1>
         {% csrf_token %} {{ form.as_p }}
         <input type="hidden" name="next" value="{{ next }}"/>
         <button type="submit" class="btn submit">כניסה</button>
     </form>
 </section>
 {% endblock content %}
-

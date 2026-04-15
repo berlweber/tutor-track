@@ -5,17 +5,24 @@
 {% block content %}
 <div class='page-header'>
     {% if student %}
-    <h1>עריכת '{{ assignment }}' </h1> {% comment "" %} this line still needs to be checked!!!!! {% endcomment %}
+    <div>
+        <p class="eyebrow">עריכת תלמיד</p>
+        <h1>עריכת '{{ student }}'</h1>
+    </div>
     {% else %}
-    <h1>הוספת תלמיד</h1>
+    <div>
+        <p class="eyebrow">תלמיד חדש</p>
+        <h1>הוספת תלמיד</h1>
+    </div>
     {% endif %}
 </div>
 
 <form action="" method="post" class="form-container">
     {% csrf_token %}
-    <table>
-        {{ form.as_p }}
-    </table>
-    <button type="submit" class='btn'>הוסיף תלמיד</button>
+    {{ form.as_p }}
+    <div class="form-actions">
+        <button type="submit" class='btn'>הוספת תלמיד</button>
+        <a href="{% url 'assignment-list' %}" class="btn secondary">ביטול</a>
+    </div>
 </form>
 {% endblock content %}

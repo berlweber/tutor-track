@@ -5,16 +5,16 @@
 {% block content %}
 <div class="page-header">
   <div>
-    <p class="eyebrow">מחיקה</p>
-    <h1>מחיקת שיבוץ</h1>
+    <p class="eyebrow">מחיקת שיעור</p>
+    <h1>מחיקת שיעור</h1>
   </div>
 </div>
-<h2 class='confirm-text'>האם למחוק את השיבוץ <strong>"{{ object }}"</strong>?</h2>
+<h2 class='confirm-text'>האם למחוק את השיעור מתאריך <strong>{{ object.date|date:"d/m/Y" }}</strong>?</h2>
 
 <form action="" method="post" class="form">
   {% csrf_token %}
   <div class="confirm-actions">
-    <a href="{% url 'assignment-detail' assignment.id %}" class="btn secondary">ביטול</a>
+    <a href="{% url 'assignment-detail' object.assignment.id %}" class="btn secondary">ביטול</a>
     <button type="submit" class="btn danger">כן, למחוק</button>
   </div>
 </form>

@@ -1,120 +1,143 @@
 {% extends "base.html" %} {% load static %}
 {% block head %}
-{% comment %} here will come css link  {% endcomment %}
-<style>
-.grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, auto)); /* Auto sizing columns */
-}
-.grid-row {
-  display: grid;
-  grid-template-columns: subgrid; /* New feature, makes row inherit parents grid */
-  grid-column: 1 / -1; /* make row span full grid */
-}
-</style>
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 {% endblock head %}
 {% block content %}
-<h1>לוח הסיכום</h1>
-<h2>סיכום של חודש {{month}} - {{year}}</h2>
+<section class="dashboard-hero">
+    <div>
+        <p class="eyebrow">לוח סיכום</p>
+        <h1>סיכום חודשי</h1>
+        <p class="dashboard-subtitle">נתוני השיעורים והתשלומים עבור {{ month }} {{ year }}</p>
+    </div>
 
-<form 
-    action="{% url "dashboard" %}"
-    method="get"
-    >
-    {% csrf_token %}
-    {{ month_picker.as_p }}
-    <button type='submit'>שלח</button>
-</form>
-
-{% comment %} <form 
-    action='{% url "dashboard-archive" year=year-picker month=month-picker %}'
-    id='month-picker-form'>
-    <label for="year-picker">תבחר חודש</label>
-    <select name="year-picker" id="year-picker">
-        {% for year in years %} 
-        <option value="{{year}}">{{year}}</option>
-        {% endfor %}
-    </select>
-
-    <label for="month-picker">תבחר חודש</label>
-    <select name="month-picker" id="month-picker">
-        {% for month in months %} 
-        <option value="{{month.0}}">{{month.1}}</option>
-        {% endfor %}
-    </select>
-    <button type='submit'>שלח</button>
-</form> {% endcomment %}
-
-<section class="global-summary">
-<h2>סה"כ לתשלום לפי מממן:</h2>
-<p><b>ישיבה:</b> {{ school_total_cost }}</p>
-<p><b>הורים:</b> {{ parents_total_cost }}</p>
-<p><b>קופה אחר:</b> {{ fund_total_cost }}</p>
-<br>
-<p><b>סה"כ כללי:</b> {{ grand_total }}</p>
-</section>
-<section>
-<h2>ישיבה</h2>
-<p><b>סה"כ:</b> {{ school_total_cost }}</p>
-
-    <div class="grid">
-        <div>הבה"ח</div>
-        <div>אברך</div>
-        <div>שעות</div>
-        <div>סכום</div>
-        <div>יעד הלימוד</div>
-        {% for assignment in school_assignments %}
-        <a href="{% url "assignment-detail" assignment.id %}" 
-        class="grid-row">
-            <div> {{ assignment.student }} </div>
-            <div> {{ assignment.tutor }} </div>
-            <div> {{ assignment.total_hours }} </div>
-            <div> {{ assignment.total_earnings }} </div>
-            <div> {{ assignment.goal }} </div>
-        </a>
-        {% endfor %}
+    <div class="dashboard-filter">
+        <div class="month-nav">
+            <form action="{% url "dashboard" %}" method="get">
+                <input type="hidden" name="month" value="{{ selected_month_value }}">
+                <button type="submit" class="btn secondary month-nav-btn" name="move" value="next">החודש הבא</button>
+            </form>
+            <form action="{% url "dashboard" %}" method="get">
+                <input type="hidden" name="month" value="{{ selected_month_value }}">
+                <button type="submit" class="btn secondary month-nav-btn" name="move" value="prev">החודש הקודם</button>
+            </form>
+        </div>
+        <form action="{% url "dashboard" %}" method="get">
+        {{ month_picker.as_p }}
+        <button type='submit' class="btn">הצג</button>
+        </form>
     </div>
 </section>
-<section>
-    <h2>הורים</h2>
-    <p><b>סה"כ:</b> {{ parents_total_cost }}</p>
-    <div class="grid">
-        <div>הבה"ח</div>
-        <div>אברך</div>
-        <div>שעות</div>
-        <div>סכום</div>
-        <div>יעד הלימוד</div>
-        {% for assignment in parents_assignments %}
-        <a href="{% url "assignment-detail" assignment.id %}" 
-        class="grid-row">
-            <div> {{ assignment.student }} </div>
-            <div> {{ assignment.tutor }} </div>
-            <div> {{ assignment.total_hours }} </div>
-            <div> {{ assignment.total_earnings }} </div>
-            <div> {{ assignment.goal }} </div>
-        </a>
-        {% endfor %}
-    </div>
+
+<section class="summary-grid">
+    <article class="summary-tile">
+        <span>ישיבה</span>
+        <strong>{{ school_total_cost }}</strong>
+    </article>
+    <article class="summary-tile">
+        <span>הורים</span>
+        <strong>{{ parents_total_cost }}</strong>
+    </article>
+    <article class="summary-tile">
+        <span>קופה אחר</span>
+        <strong>{{ fund_total_cost }}</strong>
+    </article>
+    <article class="summary-tile accent">
+        <span>סה"כ כללי</span>
+        <strong>{{ grand_total }}</strong>
+    </article>
 </section>
-<section>
-<h2>קופה אחר</h2>
-<p><b>סה"כ:</b> {{ fund_total_cost }}</p>
-    <div class="grid">
-        <div>הבה"ח</div>
-        <div>אברך</div>
-        <div>שעות</div>
-        <div>סכום</div>
-        <div>יעד הלימוד</div>
-        {% for assignment in fund_assignments %}
-        <a href="{% url "assignment-detail" assignment.id %}" 
-        class="grid-row">
-            <div> {{ assignment.student }} </div>
-            <div> {{ assignment.tutor }} </div>
-            <div> {{ assignment.total_hours }} </div>
-            <div> {{ assignment.total_earnings }} </div>
-            <div> {{ assignment.goal }} </div>
-        </a>
+<section class="dashboard-sections">
+    <article class="dashboard-card">
+        <div class="dashboard-card-header">
+            <div>
+                <h2>ישיבה</h2>
+                <p>סה"כ: {{ school_total_cost }}</p>
+            </div>
+        </div>
+        <div class="dashboard-table">
+            <div class="dashboard-row dashboard-head">
+                <div>הבה"ח</div>
+                <div>אברך</div>
+                <div>מספר שיעורים</div>
+                <div>סכום</div>
+                <div>יעד הלימוד</div>
+                <div>דוח חודשי</div>
+            </div>
+            {% for assignment in school_assignments %}
+            <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-row">
+                <div>{{ assignment.student }}</div>
+                <div>{{ assignment.tutor_display_name }}</div>
+                <div>{{ assignment.total_sessions }}</div>
+                <div>{{ assignment.total_earnings }}</div>
+                <div>{{ assignment.goal }}</div>
+                <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>
+            </a>
+            {% empty %}
+            <div class="dashboard-empty">אין נתונים לקטגוריה זו בחודש שנבחר.</div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="dashboard-card">
+        <div class="dashboard-card-header">
+            <div>
+                <h2>הורים</h2>
+                <p>סה"כ: {{ parents_total_cost }}</p>
+            </div>
+        </div>
+        <div class="dashboard-table">
+            <div class="dashboard-row dashboard-head">
+                <div>הבה"ח</div>
+                <div>אברך</div>
+                <div>מספר שיעורים</div>
+                <div>סכום</div>
+                <div>יעד הלימוד</div>
+                <div>דוח חודשי</div>
+            </div>
+            {% for assignment in parents_assignments %}
+            <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-row">
+                <div>{{ assignment.student }}</div>
+                <div>{{ assignment.tutor_display_name }}</div>
+                <div>{{ assignment.total_sessions }}</div>
+                <div>{{ assignment.total_earnings }}</div>
+                <div>{{ assignment.goal }}</div>
+                <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>
+            </a>
+            {% empty %}
+            <div class="dashboard-empty">אין נתונים לקטגוריה זו בחודש שנבחר.</div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="dashboard-card">
+        <div class="dashboard-card-header">
+            <div>
+                <h2>קופה אחר</h2>
+                <p>סה"כ: {{ fund_total_cost }}</p>
+            </div>
+        </div>
+        <div class="dashboard-table">
+            <div class="dashboard-row dashboard-head">
+                <div>הבה"ח</div>
+                <div>אברך</div>
+                <div>מספר שיעורים</div>
+                <div>סכום</div>
+                <div>יעד הלימוד</div>
+                <div>דוח חודשי</div>
+            </div>
+            {% for assignment in fund_assignments %}
+            <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-row">
+                <div>{{ assignment.student }}</div>
+                <div>{{ assignment.tutor_display_name }}</div>
+                <div>{{ assignment.total_sessions }}</div>
+                <div>{{ assignment.total_earnings }}</div>
+                <div>{{ assignment.goal }}</div>
+                <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>
+            </a>
+            {% empty %}
+            <div class="dashboard-empty">אין נתונים לקטגוריה זו בחודש שנבחר.</div>
         {% endfor %}
-    </div>
+        </div>
+    </article>
 </section>
 {% endblock content %}

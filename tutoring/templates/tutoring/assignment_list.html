@@ -4,8 +4,10 @@
 {% endblock head %}
 {% block content %}
 <section class='page-header'>
-    <h1>שיבוצים</h1>
-    <hr />
+    <div>
+        <p class="eyebrow">מרכז השיבוצים</p>
+        <h1>שיבוצים</h1>
+    </div>
     {% if user.is_superuser %}
     <button class='btn' onclick="location.href='{% url "assignment-create" %}'" type="button">שיבוץ חדש</button>
     {% endif %}
@@ -18,11 +20,13 @@
     {% for assignment in assignment_list %}
     <div class='card' DIR="RTL">
         <a href="{% url "assignment-detail"  assignment.id %}">
-            <h2 class='card-header'>תלמיד: {{ assignment.student }} </h2>
-            <h2 class='card-header'>אברך: {{ assignment.tutor }}</h2>
+            <div class="card-topline">
+                <span class="pill">{{ assignment.get_sponsor_display }}</span>
+                <span class="card-time">{{ assignment.start_time|time:"H:i" }} - {{ assignment.end_time|time:"H:i" }}</span>
+            </div>
+            <h2 class='card-header'>{{ assignment.student }}</h2>
+            <p class="card-subtitle">{{ assignment.tutor_display_name }}</p>
             <div class='card-content'>
-                <p>זמן לימוד: {{ assignment.start_time}} - 
-                    {{ assignment.end_time }} </p>
                 <p>מטרת הלימוד: {{ assignment.goal }} </p>
             </div>
         </a>

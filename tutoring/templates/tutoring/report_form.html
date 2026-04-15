@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% load static %}
+{% block head %}
+<link rel="stylesheet" href="{% static "css/assignments/assignment-form.css" %}">
+{% endblock head %}
+{% block content %}
+<div class='page-header'>
+    <div>
+        <p class="eyebrow">דוח חודשי</p>
+        {% if object %}
+        <h1>עריכת דוח עבור '{{ assignment.student }}'</h1>
+        {% else %}
+        <h1>יצירת דוח עבור '{{ assignment.student }}'</h1>
+        {% endif %}
+    </div>
+</div>
+
+<form action="" method="post" class="form-container">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-actions">
+        <button type="submit" class='btn'>{% if object %}שמירת שינויים{% else %}שמירת דוח{% endif %}</button>
+        <a href="{% url 'assignment-detail' assignment.id %}" class="btn secondary">ביטול</a>
+    </div>
+</form>
+{% endblock content %}

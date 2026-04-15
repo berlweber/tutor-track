@@ -1,101 +1,275 @@
+.detail-header {
+  margin-bottom: 1.25rem;
+}
+
 .assignment-container {
-    background-color: white;
-    border: 1px solid #DADFE4;
-    border-radius: 12px;
-    padding: 25px;
-    margin: 30px;
-    text-align: right;
+  background: linear-gradient(180deg, rgba(255, 253, 249, 0.97), rgba(251, 247, 241, 0.97));
+  border: 1px solid var(--line);
+  border-radius: 1.6rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.assignment-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.summary-card,
+.goal-panel,
+.subsection-content,
+.table-shell {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(24, 48, 71, 0.09);
+  border-radius: 1.25rem;
+}
+
+.summary-card {
+  padding: 1rem 1.1rem;
+}
+
+.summary-card strong {
+  font-size: 1.1rem;
+}
+
+.summary-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.45rem;
+}
+
+.goal-panel {
+  margin-top: 1rem;
+  padding: 1.25rem;
+}
+
+.goal-panel p {
+  margin: 0;
+  white-space: pre-line;
 }
 
 .assignment-actions {
-    margin-top: 50px;
+  margin-top: 1.25rem;
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.assignment-actions .btn {
+  width: auto;
+  min-width: 9rem;
 }
 
 .sessions {
-    text-align: right;
-    margin-top: 50px;
+  margin-top: 2rem;
+  text-align: right;
 }
 
-form {
-    margin-right: 0;
-    margin-left: auto;
+.subsection-title p {
+  color: var(--muted);
 }
 
 .subsection-content {
-    background: white;
-    border: 1px solid #DADFE4;
-    border-radius: 12px;
-    padding: 25px;
-    max-width: 450px;
-    margin-bottom: 35px;
+  max-width: 34rem;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-soft);
 }
 
-
-input {
-    height: 40px;
-    border: #E5E7EB 1px solid;
-    border-radius: 6px;
-    padding: 0 10px;
-    width: 100%;
-    margin-top: 5px;
-    margin-bottom: 16px;
+.subsection-actions {
+  display: flex;
+  width: min(100%, 12rem);
+  margin-right: 0;
+  margin-left: auto;
 }
 
-input:focus {
-    border: #2C3E50;
+.subsection-actions .btn {
+  width: 100%;
 }
 
-label {
-    font-weight: 500;
-    color: #374151;
-    display: block;
-    text-align: right;
-    margin-bottom: 6px;
+.table-shell {
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
 }
 
-p {
-    margin-bottom: 14px
+.inline-actions {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
 }
 
-textarea  {
-    height: 150px;
-    border: #E5E7EB 1px solid;
-    border-radius: 6px;
-    padding: 0 10px;
-    width: 100%;
-    margin-top: 5px;
-    margin-bottom: 16px;
-    padding: 12px 20px;
-    resize: none;
-    font-size: 16px;
-    font-family: inherit;
+.table-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.2rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 800;
+  color: var(--brand);
+  background: rgba(22, 50, 79, 0.08);
+  transition: background-color 160ms ease, transform 160ms ease;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border: 1px solid #DADFE4;
-    border-radius: 12px;
-    overflow: hidden;
+.table-action:hover {
+  background: rgba(22, 50, 79, 0.14);
+  transform: translateY(-1px);
+}
+
+.danger-link {
+  color: var(--danger);
+  background: rgba(185, 75, 75, 0.1);
+}
+
+.danger-link:hover {
+  background: rgba(185, 75, 75, 0.18);
+}
+
+.empty-cell {
+  text-align: center;
+  color: var(--muted);
+}
+
+.reports-section {
+  margin-top: 2rem;
+}
+
+.month-block {
+  margin-bottom: 1.4rem;
+}
+
+.month-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 0.9rem;
+}
+
+.report-card {
+  padding: 1.2rem;
+  background: linear-gradient(180deg, rgba(255, 253, 249, 0.97), rgba(251, 247, 241, 0.97));
+  border: 1px solid var(--line);
+  border-radius: 1.35rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.report-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.report-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.report-card p {
+  margin: 0;
+  color: var(--muted);
+  white-space: pre-line;
+}
+
+.report-meta {
+  margin-top: 0.9rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.month-report-card {
+  margin-top: 1rem;
+}
+
+.month-report-empty {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(24, 48, 71, 0.09);
+  border-radius: 1.1rem;
+  color: var(--muted);
+}
+
+.empty-report {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.month-summary-row {
+  background: rgba(22, 50, 79, 0.05);
+}
+
+.month-summary-row td {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.month-summary-separator {
+  display: inline-block;
+  margin: 0 0.45rem;
+  color: var(--muted);
 }
 
 thead {
-    background: #F9FAFB;
+  background: rgba(22, 50, 79, 0.06);
 }
 
 th {
-    padding: 12px;
-    text-align: right;
-    font-weight: 600;
-    color: #374151;
+  padding: 1rem 1.1rem;
+  color: var(--muted);
+  font-weight: 800;
 }
 
 td {
-    padding: 12px;
-    border-top: 1px solid #E5E7EB;
+  padding: 1rem 1.1rem;
+  border-top: 1px solid rgba(24, 48, 71, 0.08);
+}
+
+tbody tr {
+  transition: background-color 160ms ease;
 }
 
 tbody tr:hover {
-    background: #F9FAFB;
+  background: rgba(22, 50, 79, 0.03);
+}
+
+@media (max-width: 960px) {
+  .assignment-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .assignment-summary,
+  .assignment-actions {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-actions .btn {
+    width: 100%;
+  }
+
+  .subsection-actions {
+    width: 100%;
+  }
+
+  .month-report-empty,
+  .report-card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

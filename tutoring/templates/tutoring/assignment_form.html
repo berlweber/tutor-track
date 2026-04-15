@@ -5,17 +5,24 @@
 {% block content %}
 <div class='page-header'>
     {% if assignment %}
-    <h1>עריכת השיבוץ של '{{ assignment }}' </h1>
+    <div>
+        <p class="eyebrow">עדכון שיבוץ</p>
+        <h1>עריכת השיבוץ של '{{ assignment }}'</h1>
+    </div>
     {% else %}
-    <h1>יצירת שיבוץ חדש</h1>
+    <div>
+        <p class="eyebrow">שיבוץ חדש</p>
+        <h1>יצירת שיבוץ חדש</h1>
+    </div>
     {% endif %}
 </div>
 
 <form action="" method="post" class="form-container">
     {% csrf_token %}
-    <table>
-        {{ form.as_p }}
-    </table>
-    <button type="submit" class='btn'>שמור</button>
+    {{ form.as_p }}
+    <div class="form-actions">
+        <button type="submit" class='btn'>שמור</button>
+        <a href="{% url 'assignment-list' %}" class="btn secondary">ביטול</a>
+    </div>
 </form>
 {% endblock content %}

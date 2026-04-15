@@ -3,20 +3,45 @@
 <link rel="stylesheet" href="{% static "css/assignments/assignment-detail.css" %}">
 {% endblock head %}
 {% block content %}
-<h1>פרטי השיבוץ</h1>
-<hr>
+<section class="page-header detail-header">
+    <div>
+        <p class="eyebrow">פרטי שיבוץ</p>
+        <h1>{{ assignment.student }}</h1>
+    </div>
+</section>
 <section class='assignment-container'>
     <div class='assignment-details'>
     {% if assignment %}
-        <h2 class='card-header'>תלמיד: {{ assignment.student }}  </h2>
-        <h2 class='card-header'>אברך: {{ assignment.tutor }} </h2>
-        <p>זמן לימוד: {{ assignment.start_time }} - {{ assignment.end_time }}  </p>
-        <p>מטרת הלימוד: {{ assignment.goal }}</p>
-        <p>תעריף לשעה:  {{ assignment.hourly_rate }}</p>
-        <p>ממומן ע"י: {{ assignment.get_sponsor_display }} </p>
+        <div class="assignment-summary">
+            <div class="summary-card">
+                <span class="summary-label">אברך</span>
+                <strong>{{ assignment.tutor_display_name }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">זמן לימוד</span>
+                <strong>{{ assignment.start_time|time:"H:i" }} - {{ assignment.end_time|time:"H:i" }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">אורך שיעור</span>
+                <strong>{{ assignment.session_length_hhmm }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">תעריף לשיעור</span>
+                <strong>{{ assignment.session_rate }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">ממומן על ידי</span>
+                <strong>{{ assignment.get_sponsor_display }}</strong>
+            </div>
+        </div>
+        <div class="goal-panel">
+            <span class="summary-label">מטרת הלימוד</span>
+            <p>{{ assignment.goal }}</p>
+        </div>
         <div class='assignment-actions'>
             <a href="{% url "assignment-update" assignment.id %}" class="btn warn">עריכה</a>
             <a href="{% url "assignment-delete" assignment.id %}" class="btn danger">מחיקה</a>
+            <a href="{% url "report-create" assignment.id %}" class="btn secondary">דוח חודשי חדש</a>
         </div>
     {% else %}
         <h2>עדיין לא נרשם שיבוצים. לחץ על "שיבוץ חדש" כדי להתחיל.</h2>
@@ -27,7 +52,7 @@
 <section class='sessions'>
     <div class='subsection-title'>
         <h2>שיעורים</h2>
-        <hr>
+        <p>הוספה מהירה של שיעור חדש ומעקב אחר היסטוריית הלימוד.</p>
     </div>
     <h3>הוספת שיעור</h3>
     <form 
@@ -38,31 +63,89 @@
     >
     {% csrf_token %}
     {{ session_form.as_p }}
-    <button type='submit' class='btn submit'>הוסיף שיעור</button>
+    <div class="subsection-actions">
+        <button type='submit' class='btn submit'>הוספת שיעור</button>
+    </div>
     </form>
     <h3>שיעורים קודמים</h3>
-    <table DIR="RTL">
-        <thead>
-            <tr>
-                <th>תאריך הלימוד</th>
-                <th>זמן התחלה</th>
-                <th>משך</th>
-                <th>הערה</th>
-                <th>נרשם בתאריך</th>
-            </tr>
-        </thead>
-        <tbody>
-                {% for session in assignment.session_set.all %}
+    {% for month_section in month_sections %}
+    <article class="month-block">
+        <div class="month-block-header">
+            <div>
+                <span class="summary-label">חודש לימוד</span>
+                <h3>{{ month_section.month_display }}</h3>
+            </div>
+        </div>
+        <div class="table-shell">
+        <table DIR="RTL">
+            <thead>
                 <tr>
-                    <td> {{ session.date }} </td>
-                    <td> {{ session.time_started }} </td>
-                    <td> {{ session.duration }} </td>
-                    <td> {{ session.note }} </td>
-                    <td> {{ session.created_at }} </td>
+                    <th>תאריך הלימוד</th>
+                    <th>משך</th>
+                    <th>הערה</th>
+                    <th>נרשם בתאריך</th>
+                    <th>פעולות</th>
                 </tr>
-                {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                    {% for session in month_section.sessions %}
+                    <tr>
+                        <td> {{ session.date|date:"d/m/Y" }} </td>
+                        <td> {{ session.duration_hhmm }} </td>
+                        <td> {{ session.note }} </td>
+                        <td> {{ session.created_at|date:"d/m/Y" }} </td>
+                        <td>
+                            <div class="inline-actions">
+                                <a href="{% url 'session-update' session.id %}" class="table-action">עריכה</a>
+                                <a href="{% url 'session-delete' session.id %}" class="table-action danger-link">מחיקה</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="month-summary-row">
+                        <td colspan="2">
+                            <strong>סה"כ שעות בחודש:</strong>
+                            {{ month_section.total_duration }}
+                        </td>
+                        <td colspan="3">
+                            <strong>סה"כ שיעורים:</strong>
+                            {{ month_section.total_sessions }}
+                            <span class="month-summary-separator">|</span>
+                            <strong>סה"כ לתשלום:</strong>
+                            {{ month_section.total_earnings }}
+                        </td>
+                    </tr>
+            </tbody>
+        </table>
+        </div>
+
+        {% if month_section.report %}
+        <article class="report-card month-report-card">
+            <div class="report-card-header">
+                <div>
+                    <span class="summary-label">דוח התקדמות לחודש</span>
+                    <h3>{{ month_section.month_display }}</h3>
+                </div>
+                <div class="inline-actions">
+                    <a href="{% url 'report-update' month_section.report.id %}" class="table-action">עריכה</a>
+                    <a href="{% url 'report-delete' month_section.report.id %}" class="table-action danger-link">מחיקה</a>
+                </div>
+            </div>
+            <p>{{ month_section.report.content|linebreaksbr }}</p>
+            <div class="report-meta">עודכן לאחרונה: {{ month_section.report.updated_at|date:"d/m/Y" }}</div>
+        </article>
+        {% else %}
+        <div class="month-report-empty">
+            <span>אין עדיין דוח לחודש הזה.</span>
+            <a href="{% url 'report-create' assignment.id %}?month={{ month_section.month|date:'Y-m' }}" class="table-action">יצירת דוח לחודש</a>
+        </div>
+        {% endif %}
+    </article>
+    {% empty %}
+        <article class="report-card empty-report">
+            <h3>עדיין אין שיעורים לשיבוץ הזה</h3>
+            <p>אחרי הוספת שיעורים, הם יופיעו כאן מחולקים לפי חודשים עם סיכום חודשי ודוח התקדמות.</p>
+        </article>
+        {% endfor %}
 </section>
 {% endblock content %}
-

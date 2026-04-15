@@ -1,46 +1,69 @@
-html {
-  box-sizing: border-box;
+:root {
+  --bg: #f5f1ea;
+  --bg-soft: #fcfaf7;
+  --panel: rgba(255, 252, 248, 0.92);
+  --panel-strong: #fffdfa;
+  --text: #183047;
+  --muted: #64748b;
+  --line: rgba(24, 48, 71, 0.12);
+  --brand: #16324f;
+  --brand-soft: #2d6278;
+  --accent: #c88b4a;
+  --accent-soft: #f3ddc1;
+  --danger: #b94b4b;
+  --danger-dark: #9f3838;
+  --shadow-soft: 0 18px 45px rgba(22, 50, 79, 0.12);
+  --shadow-strong: 0 24px 60px rgba(22, 50, 79, 0.18);
 }
 
-/* The Universal Selector */
-*, /* All elements*/
-*::before, /* All ::before pseudo-elements */
+html {
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+*,
+*::before,
 *::after {
-  /* All ::after pseudo-elements */
-  /* height & width will now include border & padding by default
-     but can be over-ridden as needed */
   box-sizing: inherit;
 }
 
 body {
   margin: 0;
-  background-color: #F4F6F8;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 
-    'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-    'Open Sans', 'Helvetica Neue', sans-serif;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(200, 139, 74, 0.16), transparent 28%),
+    radial-gradient(circle at top left, rgba(45, 98, 120, 0.16), transparent 26%),
+    linear-gradient(180deg, #f8f4ed 0%, #f3efe7 48%, #f7f3ec 100%);
+  color: var(--text);
+  font-family: "Assistant", sans-serif;
   font-size: 1rem;
-  line-height: 1.5;
-  --button-bg: #2C3E50;
-  --button-bg-hover: #4c5157;
+  line-height: 1.55;
 }
 
-header {
-  width: 100%;
-  background-color: #586169;
-  color: white;
-  height: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+a {
+  color: inherit;
 }
 
-nav {
-  width: 100%;
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1rem 1.2rem 0;
+  backdrop-filter: blur(14px);
+}
+
+.site-nav {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0.9rem 1.2rem;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 40px;
+  gap: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 1.4rem;
+  background: linear-gradient(135deg, rgba(16, 36, 56, 0.92), rgba(35, 76, 96, 0.88));
+  color: #fffaf4;
+  box-shadow: 0 22px 50px rgba(17, 37, 57, 0.22);
 }
 
 ul {
@@ -49,140 +72,247 @@ ul {
   padding: 0;
 }
 
-.app-name {
-  flex-grow: 1;
-  font-size: 2rem;
-  font-weight: bold;
-  text-align: center;
-  margin: 0 !important;
-  align-self: center;
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex: 1;
+  flex-wrap: wrap;
 }
 
-nav ul {
-  display: flex;
-  justify-content: stretch;
+.nav-links li,
+.logout button {
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.nav-links li {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-links li:hover,
+.logout button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 14px 24px rgba(9, 20, 33, 0.2);
+}
+
+.nav-links a,
+.logout button {
+  display: inline-flex;
   align-items: center;
-  text-align: center;
-  flex-grow: 100;
-  gap: 12px;
+  justify-content: center;
+  padding: 0.72rem 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.98rem;
 }
 
 .logout {
-  text-align: end;
-  flex-grow: 1;
+  display: flex;
+  justify-content: flex-start;
 }
 
-#logout-form button {
-  flex-grow: 1;
-  text-decoration: none;
-  color: white;
-  background-color: #2C3E50;
-  border: none;
-  font-family: inherit;
+#logout-form {
+  margin: 0;
+}
+
+.logout button {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
-  font-size: 1rem;
-  padding: 6px 16px;
-  border: #2C3E50 solid 1px;
-  border-radius: 5px;
-  width: 100%;
-  height: 100%;
 }
 
-nav li {
-  background-color: #2C3E50;
-  margin: 0 20px;
-  max-height: 70px;
-  font-size: 1rem;
-  width: 100%;
-  padding: 5px 8px;
-  border: #2C3E50 solid 1px;
-  border-radius: 5px;
+.app-name {
+  margin: 0;
+  font-family: "Rubik", sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
-nav li:hover, #logout-form button:hover {
-  background-color: var(--button-bg-hover);
-  box-shadow: 0 2px 6px rgba(44, 44, 49, 0.411)
+.site-main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 2.25rem 1.2rem 4rem;
 }
 
-nav li:active #logout-form button:active {
-  background-color: #040507;
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--brand-soft);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
 }
 
-li a {
-  color: white;
-  width: 100%;
-  height: 100%;
-  text-decoration: none;
-  display: block;
+h1,
+h2,
+h3 {
+  font-family: "Rubik", sans-serif;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-top: 0;
 }
 
-main {
-  max-width: 1100px;
-  margin: 20px auto;
-  padding: 0 40px;
-  text-align: center;
-  /* margin-bottom: 40px; */
+h1 {
+  font-size: clamp(2.1rem, 4vw, 3.4rem);
+  margin-bottom: 0.35rem;
+}
+
+h2 {
+  font-size: clamp(1.4rem, 2vw, 1.9rem);
+}
+
+p {
+  margin-top: 0;
+}
+
+.page-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
 }
 
 .btn {
-  font-size: 1rem;
-  padding: 8px 16px;
-  border-radius: 8px;
-  border-width: 2px;
-  border-style: solid;
-  text-decoration: none;
-  background-color: var(--button-bg);
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  margin-right: 10px;
-  color: white;
-  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, var(--brand), var(--brand-soft));
+  color: #fffdf9;
+  text-decoration: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 16px 28px rgba(22, 50, 79, 0.18);
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
 
 .btn:hover {
-  background-color: var(--button-bg-hover);
-  box-shadow: 0 2px 6px rgba(44, 44, 49, 0.411)
+  transform: translateY(-2px);
+  box-shadow: 0 22px 34px rgba(22, 50, 79, 0.22);
+  filter: saturate(1.05);
 }
 
 .btn:active {
-  background-color: #040507;
+  transform: translateY(0);
 }
 
-.submit {
-  border-color: var(--submit);
+.secondary {
+  background: linear-gradient(135deg, #7d8f9b, #93a3ad);
 }
 
-@media only screen and (min-width: 768px) {
-  .app-name {
-  font-size: 1.3rem;
+.danger {
+  background: linear-gradient(135deg, var(--danger), var(--danger-dark));
 }
 
+.warn {
+  background: linear-gradient(135deg, #c88b4a, #dda96f);
 }
 
-@media only screen and (min-width: 1024px) {
-  main {
-    min-height: calc(100vh - 55px);
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid rgba(24, 48, 71, 0.16);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--text);
+  font: inherit;
+  padding: 0.9rem 1rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+input,
+select {
+  min-height: 3rem;
+}
+
+textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: rgba(45, 98, 120, 0.45);
+  box-shadow: 0 0 0 4px rgba(45, 98, 120, 0.12);
+  background: #fff;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+form p {
+  margin-bottom: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: right;
+}
+
+::selection {
+  background: rgba(200, 139, 74, 0.24);
+}
+
+@media (max-width: 1024px) {
+  .site-nav {
+    flex-wrap: wrap;
+    justify-content: center;
   }
-  .app-name {
-  font-size: 1.7rem;
+
+  .app-name,
+  .logout,
+  .nav-links {
+    flex: unset;
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 }
 
-@media only screen and (min-width: 1270px) {
-  main {
-    min-height: calc(100vh - 55px);
+@media (max-width: 720px) {
+  .site-main {
+    padding: 1.6rem 0.9rem 3rem;
   }
-  .app-name {
-  font-size: 2rem;
-  font-weight: bold;
+
+  .site-header {
+    padding: 0.75rem 0.75rem 0;
   }
-}
 
-@media only screen and (max-width: 768px) {
-  .app-name {
+  .site-nav {
+    padding: 1rem;
+    border-radius: 1.15rem;
+  }
 
-  font-size: 1.3rem;
-}
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

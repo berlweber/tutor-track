@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% load static %}
+{% block head %}
+<link rel="stylesheet" href="{% static "css/assignments/assignment-form.css" %}">
+{% endblock head %}
+{% block content %}
+<div class='page-header'>
+    <div>
+        <p class="eyebrow">עריכת שיעור</p>
+        <h1>עדכון שיעור</h1>
+    </div>
+</div>
+
+<form action="" method="post" class="form-container">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-actions">
+        <button type="submit" class='btn'>שמירת שינויים</button>
+        <a href="{% url 'assignment-detail' object.assignment.id %}" class="btn secondary">ביטול</a>
+    </div>
+</form>
+{% endblock content %}
