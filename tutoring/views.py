@@ -1,23 +1,88 @@
-
-from doctest import debug
-
-from django.shortcuts import redirect, render
+from collections import OrderedDict
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.views import LoginView
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import  ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
-import datetime, calendar
+import datetime
 
-from .models import Assignment, Student, Session
-from .forms import SessionForm, MonthPickerForm
+from .models import (
+    Assignment,
+    MonthlyReport,
+    Student,
+    Session,
+    HEBREW_MONTHS,
+    format_duration_hhmm,
+    month_label,
+)
+from .forms import (
+    AssignmentForm,
+    LoginForm,
+    MonthlyReportForm,
+    MonthPickerForm,
+    SessionForm,
+)
+
+
+def calculate_session_length(start_time, end_time):
+    start_dt = datetime.datetime.combine(datetime.date.today(), start_time)
+    end_dt = datetime.datetime.combine(datetime.date.today(), end_time)
+    return end_dt - start_dt
+
+
+def month_start(date_value):
+    return date_value.replace(day=1)
+
+
+def shift_month(date_value, delta):
+    year = date_value.year + ((date_value.month - 1 + delta) // 12)
+    month = ((date_value.month - 1 + delta) % 12) + 1
+    return datetime.date(year, month, 1)
+
+
+def build_assignment_month_sections(assignment):
+    grouped_sessions = OrderedDict()
+    reports_by_month = {
+        report.month: report
+        for report in assignment.monthlyreport_set.all()
+    }
+
+    for session in assignment.session_set.all():
+        month_key = datetime.date(session.date.year, session.date.month, 1)
+        if month_key not in grouped_sessions:
+            grouped_sessions[month_key] = []
+        grouped_sessions[month_key].append(session)
+
+    month_sections = []
+    for month_key, sessions in grouped_sessions.items():
+        total_duration = sum(
+            (session.duration or datetime.timedelta(0) for session in sessions),
+            start=datetime.timedelta(0),
+        )
+        total_sessions = len(sessions)
+        month_sections.append(
+            {
+                "month": month_key,
+                "month_display": month_label(month_key),
+                "sessions": sessions,
+                "total_duration": format_duration_hhmm(total_duration),
+                "total_earnings": total_sessions * assignment.session_rate,
+                "total_sessions": total_sessions,
+                "report": reports_by_month.get(month_key),
+            }
+        )
+
+    return month_sections
+
 
 # Create your views here.
 class Home(LoginView):
     template_name = 'home.html'
+    authentication_form = LoginForm
 
 class AssignmentList(LoginRequiredMixin, ListView):
     model = Assignment
@@ -30,13 +95,16 @@ class AssignmentList(LoginRequiredMixin, ListView):
 
 class AssignmentCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Assignment
-    fields = '__all__'
+    form_class = AssignmentForm
 
     def test_func(self):
         return self.request.user.is_superuser
 
     def form_valid(self, form):
-        form.instance.user = self.request.user
+        form.instance.session_length = calculate_session_length(
+            form.instance.start_time,
+            form.instance.end_time,
+        )
         return super().form_valid(form)
     
 class AssignmentDetail(LoginRequiredMixin, UserPassesTestMixin, DetailView):
@@ -48,15 +116,25 @@ class AssignmentDetail(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['session_form'] = SessionForm()
+        context['session_form'] = SessionForm(
+            initial={"duration": self.object.session_length}
+        )
+        context["month_sections"] = build_assignment_month_sections(self.object)
         return context
 
 class AssignmentUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Assignment
-    fields = ['goal', 'hourly_rate', 'sponsor', 'start_time', 'end_time']
+    form_class = AssignmentForm
 
     def test_func(self):
         return self.request.user.is_superuser
+
+    def form_valid(self, form):
+        form.instance.session_length = calculate_session_length(
+            form.instance.start_time,
+            form.instance.end_time,
+        )
+        return super().form_valid(form)
 
 class AssignmentDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Assignment
@@ -82,6 +160,96 @@ def must_be_yours(func):
         return func(request, *args, **kwargs)
     return check_and_call
 
+
+class AssignmentOwnerMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        obj = self.get_object()
+        assignment = getattr(obj, "assignment", obj)
+        return self.request.user.is_superuser or assignment.tutor == self.request.user
+
+
+class SessionUpdate(AssignmentOwnerMixin, UpdateView):
+    model = Session
+    form_class = SessionForm
+    template_name = "tutoring/session_form.html"
+
+    def get_success_url(self):
+        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id})
+
+
+class SessionDelete(AssignmentOwnerMixin, DeleteView):
+    model = Session
+    template_name = "tutoring/session_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id})
+
+
+class MonthlyReportCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = MonthlyReport
+    form_class = MonthlyReportForm
+    template_name = "tutoring/report_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.assignment = get_object_or_404(Assignment, pk=self.kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.assignment.tutor == self.request.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["assignment"] = self.assignment
+        return context
+
+    def get_initial(self):
+        initial = super().get_initial()
+        month_value = self.request.GET.get("month")
+        if month_value:
+            try:
+                initial["month"] = datetime.datetime.strptime(month_value, "%Y-%m").date()
+            except ValueError:
+                pass
+        return initial
+
+    def form_valid(self, form):
+        if MonthlyReport.objects.filter(
+            assignment=self.assignment,
+            month=form.cleaned_data["month"],
+        ).exists():
+            form.add_error("month", "כבר קיים דוח לחודש הזה עבור השיבוץ הזה.")
+            return self.form_invalid(form)
+        form.instance.assignment = self.assignment
+        return super().form_valid(form)
+
+
+class MonthlyReportUpdate(AssignmentOwnerMixin, UpdateView):
+    model = MonthlyReport
+    form_class = MonthlyReportForm
+    template_name = "tutoring/report_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["assignment"] = self.object.assignment
+        return context
+
+    def form_valid(self, form):
+        if MonthlyReport.objects.filter(
+            assignment=self.object.assignment,
+            month=form.cleaned_data["month"],
+        ).exclude(pk=self.object.pk).exists():
+            form.add_error("month", "כבר קיים דוח לחודש הזה עבור השיבוץ הזה.")
+            return self.form_invalid(form)
+        return super().form_valid(form)
+
+
+class MonthlyReportDelete(AssignmentOwnerMixin, DeleteView):
+    model = MonthlyReport
+    template_name = "tutoring/report_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id})
+
 @must_be_yours
 @csrf_protect
 @login_required
@@ -96,33 +264,40 @@ def add_session(request, pk):
 def calculate_totals(assignment, month, year):
     if month == 'all':
         sessions = Session.objects.filter(assignment__id=assignment.id) ## add a aggregation to return ordered by month for details page
+        report = None
     else:
         sessions = Session.objects.filter(assignment__id=assignment.id).filter(date__month=month).filter(date__year=year)
-    # create a list and fill it with all the timedelta's /duration in a second's format, which counnts as here as minutes
-    durations_list = []
-    for session in sessions:
-        durations_list.append(session.duration)
-        
-    # sums up all timedelta's/durations in to one number, 
-    # get the total second (which counts as minutes) as a normal int, finaly, multilplies it  by 60 to get the total hours
-    total_hours = sum(durations_list, start=datetime.timedelta(0)).total_seconds() / 60
-    total_earnings = total_hours * assignment.hourly_rate
-    assignment.total_hours = total_hours
+        report = MonthlyReport.objects.filter(
+            assignment_id=assignment.id,
+            month=datetime.date(year, month, 1),
+        ).first()
+    total_sessions = sessions.count()
+    total_earnings = total_sessions * assignment.session_rate
+    assignment.total_sessions = total_sessions
     assignment.total_earnings = total_earnings
+    assignment.monthly_report = report
 
     return assignment
 
 @login_required
 def dashboard(request):
-    month=datetime.datetime.now().month
-    year=datetime.datetime.now().year
+    selected_month = month_start(datetime.date.today())
 
     if request.method == 'GET':
         form = MonthPickerForm(request.GET)
         if form.is_valid():
-            date_value = form.cleaned_data["month"]
-            year = date_value.year
-            month = date_value.month
+            selected_month = month_start(form.cleaned_data["month"])
+            if request.GET.get("move") in {"prev", "next"}:
+                selected_month = shift_month(
+                    selected_month,
+                    -1 if request.GET["move"] == "prev" else 1,
+                )
+                form = MonthPickerForm(initial={"month": selected_month})
+    else:
+        form = MonthPickerForm(initial={"month": selected_month})
+
+    year = selected_month.year
+    month = selected_month.month
 
     assignments = ''
     if request.user.is_superuser:
@@ -158,7 +333,10 @@ def dashboard(request):
         'parents_total_cost': parents_total_cost,
         'fund_total_cost': fund_total_cost,
         'grand_total': grand_total,
-        'month': calendar.month_name[month],
+        'month': HEBREW_MONTHS[month],
         'year': year,
-        'month_picker': MonthPickerForm()
+        'month_picker': form,
+        'selected_month_value': selected_month.strftime("%Y-%m"),
+        'prev_month_value': shift_month(selected_month, -1).strftime("%Y-%m"),
+        'next_month_value': shift_month(selected_month, 1).strftime("%Y-%m"),
     })
