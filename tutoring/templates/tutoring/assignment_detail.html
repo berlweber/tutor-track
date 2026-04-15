@@ -49,7 +49,7 @@
     </div>
 </section>
 
-<section class='sessions'>
+<section class='sessions' id='sessions'>
     <div class='subsection-title'>
         <h2>שיעורים</h2>
         <p>הוספה מהירה של שיעור חדש ומעקב אחר היסטוריית הלימוד.</p>
@@ -67,9 +67,9 @@
         <button type='submit' class='btn submit'>הוספת שיעור</button>
     </div>
     </form>
-    <h3>שיעורים קודמים</h3>
+    <h3 id="previous-sessions">שיעורים קודמים</h3>
     {% for month_section in month_sections %}
-    <article class="month-block">
+    <article class="month-block" id="month-{{ month_section.month|date:'Y-m' }}">
         <div class="month-block-header">
             <div>
                 <span class="summary-label">חודש לימוד</span>

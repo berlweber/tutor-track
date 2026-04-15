@@ -174,7 +174,8 @@ class SessionUpdate(AssignmentOwnerMixin, UpdateView):
     template_name = "tutoring/session_form.html"
 
     def get_success_url(self):
-        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id})
+        month_str = self.object.date.strftime('%Y-%m')
+        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
 
 
 class SessionDelete(AssignmentOwnerMixin, DeleteView):
@@ -182,7 +183,8 @@ class SessionDelete(AssignmentOwnerMixin, DeleteView):
     template_name = "tutoring/session_confirm_delete.html"
 
     def get_success_url(self):
-        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id})
+        month_str = self.object.date.strftime('%Y-%m')
+        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
 
 
 class MonthlyReportCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -222,6 +224,11 @@ class MonthlyReportCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         form.instance.assignment = self.assignment
         return super().form_valid(form)
 
+    def get_success_url(self):
+        # Get the month from the object after it's been saved
+        month_str = self.object.month.strftime('%Y-%m')
+        return reverse("assignment-detail", kwargs={"pk": self.assignment.id}) + f"#month-{month_str}"
+
 
 class MonthlyReportUpdate(AssignmentOwnerMixin, UpdateView):
     model = MonthlyReport
@@ -242,13 +249,21 @@ class MonthlyReportUpdate(AssignmentOwnerMixin, UpdateView):
             return self.form_invalid(form)
         return super().form_valid(form)
 
+    def get_success_url(self):
+        month_str = self.object.month.strftime('%Y-%m')
+        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
+
+    def get_success_url(self):
+        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + "#previous-sessions"
+
 
 class MonthlyReportDelete(AssignmentOwnerMixin, DeleteView):
     model = MonthlyReport
     template_name = "tutoring/report_confirm_delete.html"
 
     def get_success_url(self):
-        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id})
+        month_str = self.object.month.strftime('%Y-%m')
+        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
 
 @must_be_yours
 @csrf_protect
@@ -259,7 +274,9 @@ def add_session(request, pk):
         new_session = form.save(commit=False)
         new_session.assignment_id = pk
         new_session.save()
-    return redirect('assignment-detail', pk=pk)
+        month_str = new_session.date.strftime('%Y-%m')
+        return redirect(reverse('assignment-detail', kwargs={'pk': pk}) + f'#month-{month_str}')
+    return redirect(reverse('assignment-detail', kwargs={'pk': pk}))
 
 def calculate_totals(assignment, month, year):
     if month == 'all':
