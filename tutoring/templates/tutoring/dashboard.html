@@ -57,7 +57,8 @@
             <div class="dashboard-row dashboard-head">
                 <div>הבה"ח</div>
                 <div>אברך</div>
-                <div>מספר שיעורים</div>
+                <div>סוג חיוב</div>
+                <div>נתוני חיוב</div>
                 <div>סכום</div>
                 <div>יעד הלימוד</div>
                 <div>דוח חודשי</div>
@@ -66,7 +67,8 @@
             <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-row">
                 <div>{{ assignment.student }}</div>
                 <div>{{ assignment.tutor_display_name }}</div>
-                <div>{{ assignment.total_sessions }}</div>
+                <div>{{ assignment.get_billing_mode_display }}</div>
+                <div>{{ assignment.activity_count }} {{ assignment.activity_label }}</div>
                 <div>{{ assignment.total_earnings }}</div>
                 <div>{{ assignment.goal }}</div>
                 <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>
@@ -88,7 +90,8 @@
             <div class="dashboard-row dashboard-head">
                 <div>הבה"ח</div>
                 <div>אברך</div>
-                <div>מספר שיעורים</div>
+                <div>סוג חיוב</div>
+                <div>נתוני חיוב</div>
                 <div>סכום</div>
                 <div>יעד הלימוד</div>
                 <div>דוח חודשי</div>
@@ -97,7 +100,8 @@
             <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-row">
                 <div>{{ assignment.student }}</div>
                 <div>{{ assignment.tutor_display_name }}</div>
-                <div>{{ assignment.total_sessions }}</div>
+                <div>{{ assignment.get_billing_mode_display }}</div>
+                <div>{{ assignment.activity_count }} {{ assignment.activity_label }}</div>
                 <div>{{ assignment.total_earnings }}</div>
                 <div>{{ assignment.goal }}</div>
                 <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>
@@ -119,7 +123,8 @@
             <div class="dashboard-row dashboard-head">
                 <div>הבה"ח</div>
                 <div>אברך</div>
-                <div>מספר שיעורים</div>
+                <div>סוג חיוב</div>
+                <div>נתוני חיוב</div>
                 <div>סכום</div>
                 <div>יעד הלימוד</div>
                 <div>דוח חודשי</div>
@@ -128,7 +133,8 @@
             <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-row">
                 <div>{{ assignment.student }}</div>
                 <div>{{ assignment.tutor_display_name }}</div>
-                <div>{{ assignment.total_sessions }}</div>
+                <div>{{ assignment.get_billing_mode_display }}</div>
+                <div>{{ assignment.activity_count }} {{ assignment.activity_label }}</div>
                 <div>{{ assignment.total_earnings }}</div>
                 <div>{{ assignment.goal }}</div>
                 <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>

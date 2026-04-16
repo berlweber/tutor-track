@@ -9,6 +9,77 @@
   text-align: right;
 }
 
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.form-grid > p,
+.billing-toggle {
+  margin: 0;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.billing-toggle ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  list-style: none;
+  margin: 0.55rem 0 0;
+  padding: 0;
+}
+
+.billing-toggle li {
+  margin: 0;
+}
+
+.billing-toggle label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.8rem;
+  background: rgba(243, 221, 193, 0.28);
+  border: 1px solid rgba(200, 139, 74, 0.2);
+  border-radius: 999px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.billing-toggle label:hover {
+  background: rgba(243, 221, 193, 0.48);
+  border-color: rgba(200, 139, 74, 0.38);
+}
+
+.billing-toggle input[type="radio"] {
+  width: auto;
+  min-height: auto;
+  margin: 0;
+  accent-color: var(--accent);
+  box-shadow: none;
+}
+
+.billing-toggle input[type="radio"]:checked + *,
+.billing-toggle label:has(input[type="radio"]:checked) {
+  color: var(--brand);
+}
+
+.billing-toggle label:has(input[type="radio"]:checked) {
+  background: rgba(243, 221, 193, 0.8);
+  border-color: rgba(200, 139, 74, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(200, 139, 74, 0.18);
+}
+
+.field-label {
+  display: block;
+  font-weight: 700;
+}
+
 .form-container .btn {
   margin-top: 0.5rem;
 }
@@ -53,6 +124,10 @@ textarea.session-note {
 }
 
 @media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
   .form-actions .btn {
     width: 100%;
     flex-basis: 100%;

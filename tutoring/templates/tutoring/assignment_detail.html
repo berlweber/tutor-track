@@ -26,9 +26,24 @@
                 <strong>{{ assignment.session_length_hhmm }}</strong>
             </div>
             <div class="summary-card">
+                <span class="summary-label">צורת חיוב</span>
+                <strong>{{ assignment.get_billing_mode_display }}</strong>
+            </div>
+            {% if assignment.is_monthly_billing %}
+            <div class="summary-card">
+                <span class="summary-label">תשלום חודשי</span>
+                <strong>{{ assignment.monthly_rate }}</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">מפגשים בשבוע</span>
+                <strong>{{ assignment.sessions_per_week }}</strong>
+            </div>
+            {% else %}
+            <div class="summary-card">
                 <span class="summary-label">תעריף לשיעור</span>
                 <strong>{{ assignment.session_rate }}</strong>
             </div>
+            {% endif %}
             <div class="summary-card">
                 <span class="summary-label">ממומן על ידי</span>
                 <strong>{{ assignment.get_sponsor_display }}</strong>
@@ -50,12 +65,120 @@
 </section>
 
 <section class='sessions' id='sessions'>
+    {% if assignment.is_monthly_billing %}
+    <div class='subsection-title'>
+        <h2>איחורים וחיסורים</h2>
+        <p>דיווח על איחורים וחיסורים שמפחיתים מהתשלום החודשי לפי חישוב אוטומטי פנימי.</p>
+    </div>
+    <h3>הוספת דיווח</h3>
+    <form
+    action="{% url "add-adjustment" assignment.id %}"
+    method="post"
+    class="subsection-content"
+    id="adjustment-form"
+    autocomplete="off"
+    >
+    {% csrf_token %}
+    <p>{{ adjustment_form.date.label_tag }} {{ adjustment_form.date }} {{ adjustment_form.date.errors }}</p>
+    <p>{{ adjustment_form.adjustment_type.label_tag }} {{ adjustment_form.adjustment_type }} {{ adjustment_form.adjustment_type.errors }}</p>
+    <p id="late-duration-field">{{ adjustment_form.duration.label_tag }} {{ adjustment_form.duration }} {{ adjustment_form.duration.errors }}</p>
+    <div class="subsection-actions">
+        <button type='submit' class='btn submit'>הוספת דיווח</button>
+    </div>
+    </form>
+    <h3 id="previous-sessions">דיווחים קודמים</h3>
+    {% for month_section in month_sections %}
+    <article class="month-block" id="month-{{ month_section.month|date:'Y-m' }}">
+        <div class="month-block-header">
+            <div>
+                <span class="summary-label">חודש חיוב</span>
+                <h3>{{ month_section.month_display }}</h3>
+            </div>
+        </div>
+        <div class="table-shell">
+        <table DIR="RTL">
+            <thead>
+                <tr>
+                    <th>תאריך</th>
+                    <th>סוג</th>
+                    <th>משך איחור</th>
+                    <th>הפחתה</th>
+                    <th>נרשם בתאריך</th>
+                    <th>פעולות</th>
+                </tr>
+            </thead>
+            <tbody>
+                    {% for adjustment in month_section.adjustments %}
+                    <tr>
+                        <td>{{ adjustment.date|date:"d/m/Y" }}</td>
+                        <td>{{ adjustment.get_adjustment_type_display }}</td>
+                        <td>{% if adjustment.duration %}{{ adjustment.duration_hhmm }}{% else %}-{% endif %}</td>
+                        <td>{{ adjustment.deduction_amount }}</td>
+                        <td>{{ adjustment.created_at|date:"d/m/Y" }}</td>
+                        <td>
+                            <div class="inline-actions">
+                                <a href="{% url 'adjustment-update' adjustment.id %}" class="table-action">עריכה</a>
+                                <a href="{% url 'adjustment-delete' adjustment.id %}" class="table-action danger-link">מחיקה</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-cell">אין דיווחים בחודש זה.</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="month-summary-row">
+                        <td colspan="3">
+                            <strong>סה"כ הפחתות:</strong>
+                            {{ month_section.total_adjustments }}
+                        </td>
+                        <td colspan="3">
+                            <strong>סה"כ הפחתה:</strong>
+                            {{ month_section.total_reduction }}
+                            <span class="month-summary-separator">|</span>
+                            <strong>סה"כ לתשלום:</strong>
+                            {{ month_section.total_earnings }}
+                        </td>
+                    </tr>
+            </tbody>
+        </table>
+        </div>
+
+        {% if month_section.report %}
+        <article class="report-card month-report-card">
+            <div class="report-card-header">
+                <div>
+                    <span class="summary-label">דוח התקדמות לחודש</span>
+                    <h3>{{ month_section.month_display }}</h3>
+                </div>
+                <div class="inline-actions">
+                    <a href="{% url 'report-update' month_section.report.id %}" class="table-action">עריכה</a>
+                    <a href="{% url 'report-delete' month_section.report.id %}" class="table-action danger-link">מחיקה</a>
+                </div>
+            </div>
+            <p>{{ month_section.report.content|linebreaksbr }}</p>
+            <div class="report-meta">עודכן לאחרונה: {{ month_section.report.updated_at|date:"d/m/Y" }}</div>
+        </article>
+        {% else %}
+        <div class="month-report-empty">
+            <span>אין עדיין דוח לחודש הזה.</span>
+            <a href="{% url 'report-create' assignment.id %}?month={{ month_section.month|date:'Y-m' }}" class="table-action">יצירת דוח לחודש</a>
+        </div>
+        {% endif %}
+    </article>
+    {% empty %}
+        <article class="report-card empty-report">
+            <h3>עדיין אין דיווחים לשיבוץ הזה</h3>
+            <p>התשלום החודשי יחושב בלוח הסיכום גם בלי דיווחים, וכאן יופיעו רק איחורים וחיסורים שנרשמו.</p>
+        </article>
+    {% endfor %}
+    {% else %}
     <div class='subsection-title'>
         <h2>שיעורים</h2>
         <p>הוספה מהירה של שיעור חדש ומעקב אחר היסטוריית הלימוד.</p>
     </div>
     <h3>הוספת שיעור</h3>
-    <form 
+    <form
     action="{% url "add-session" assignment.id %}"
     method="post"
     class="subsection-content"
@@ -90,10 +213,10 @@
             <tbody>
                     {% for session in month_section.sessions %}
                     <tr>
-                        <td> {{ session.date|date:"d/m/Y" }} </td>
-                        <td> {{ session.duration_hhmm }} </td>
-                        <td> {{ session.note }} </td>
-                        <td> {{ session.created_at|date:"d/m/Y" }} </td>
+                        <td>{{ session.date|date:"d/m/Y" }}</td>
+                        <td>{{ session.duration_hhmm }}</td>
+                        <td>{{ session.note }}</td>
+                        <td>{{ session.created_at|date:"d/m/Y" }}</td>
                         <td>
                             <div class="inline-actions">
                                 <a href="{% url 'session-update' session.id %}" class="table-action">עריכה</a>
@@ -146,6 +269,30 @@
             <h3>עדיין אין שיעורים לשיבוץ הזה</h3>
             <p>אחרי הוספת שיעורים, הם יופיעו כאן מחולקים לפי חודשים עם סיכום חודשי ודוח התקדמות.</p>
         </article>
-        {% endfor %}
+    {% endfor %}
+    {% endif %}
 </section>
+{% if assignment.is_monthly_billing %}
+<script>
+    (function () {
+        const form = document.getElementById("adjustment-form");
+        if (!form) return;
+
+        const typeField = form.querySelector('select[name="adjustment_type"]');
+        const durationField = document.getElementById("late-duration-field");
+
+        function syncAdjustmentFields() {
+            const isLate = typeField && typeField.value === "late";
+            if (durationField) {
+                durationField.hidden = !isLate;
+            }
+        }
+
+        if (typeField) {
+            typeField.addEventListener("change", syncAdjustmentFields);
+            syncAdjustmentFields();
+        }
+    }());
+</script>
+{% endif %}
 {% endblock content %}

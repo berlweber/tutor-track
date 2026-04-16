@@ -12,6 +12,7 @@ import datetime
 
 from .models import (
     Assignment,
+    AttendanceAdjustment,
     MonthlyReport,
     Student,
     Session,
@@ -21,6 +22,7 @@ from .models import (
 )
 from .forms import (
     AssignmentForm,
+    AttendanceAdjustmentForm,
     LoginForm,
     MonthlyReportForm,
     MonthPickerForm,
@@ -45,36 +47,65 @@ def shift_month(date_value, delta):
 
 
 def build_assignment_month_sections(assignment):
-    grouped_sessions = OrderedDict()
+    grouped_items = OrderedDict()
     reports_by_month = {
         report.month: report
         for report in assignment.monthlyreport_set.all()
     }
 
-    for session in assignment.session_set.all():
-        month_key = datetime.date(session.date.year, session.date.month, 1)
-        if month_key not in grouped_sessions:
-            grouped_sessions[month_key] = []
-        grouped_sessions[month_key].append(session)
+    if assignment.is_monthly_billing:
+        for adjustment in assignment.attendanceadjustment_set.all():
+            month_key = datetime.date(adjustment.date.year, adjustment.date.month, 1)
+            if month_key not in grouped_items:
+                grouped_items[month_key] = []
+            grouped_items[month_key].append(adjustment)
+    else:
+        for session in assignment.session_set.all():
+            month_key = datetime.date(session.date.year, session.date.month, 1)
+            if month_key not in grouped_items:
+                grouped_items[month_key] = []
+            grouped_items[month_key].append(session)
+
+    for report_month in reports_by_month:
+        grouped_items.setdefault(report_month, [])
 
     month_sections = []
-    for month_key, sessions in grouped_sessions.items():
-        total_duration = sum(
-            (session.duration or datetime.timedelta(0) for session in sessions),
-            start=datetime.timedelta(0),
-        )
-        total_sessions = len(sessions)
-        month_sections.append(
-            {
-                "month": month_key,
-                "month_display": month_label(month_key),
-                "sessions": sessions,
-                "total_duration": format_duration_hhmm(total_duration),
-                "total_earnings": total_sessions * assignment.session_rate,
-                "total_sessions": total_sessions,
-                "report": reports_by_month.get(month_key),
-            }
-        )
+    for month_key in sorted(grouped_items.keys(), reverse=True):
+        month_items = grouped_items[month_key]
+        if assignment.is_monthly_billing:
+            total_adjustments = len(month_items)
+            total_reduction = sum(
+                (adjustment.deduction_amount for adjustment in month_items),
+                start=0,
+            )
+            month_sections.append(
+                {
+                    "month": month_key,
+                    "month_display": month_label(month_key),
+                    "adjustments": month_items,
+                    "total_adjustments": total_adjustments,
+                    "total_reduction": total_reduction,
+                    "total_earnings": (assignment.monthly_rate or 0) - total_reduction,
+                    "report": reports_by_month.get(month_key),
+                }
+            )
+        else:
+            total_duration = sum(
+                (session.duration or datetime.timedelta(0) for session in month_items),
+                start=datetime.timedelta(0),
+            )
+            total_sessions = len(month_items)
+            month_sections.append(
+                {
+                    "month": month_key,
+                    "month_display": month_label(month_key),
+                    "sessions": month_items,
+                    "total_duration": format_duration_hhmm(total_duration),
+                    "total_earnings": total_sessions * assignment.session_rate,
+                    "total_sessions": total_sessions,
+                    "report": reports_by_month.get(month_key),
+                }
+            )
 
     return month_sections
 
@@ -116,9 +147,12 @@ class AssignmentDetail(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['session_form'] = SessionForm(
-            initial={"duration": self.object.session_length}
-        )
+        if self.object.is_monthly_billing:
+            context["adjustment_form"] = AttendanceAdjustmentForm()
+        else:
+            context["session_form"] = SessionForm(
+                initial={"duration": self.object.session_length}
+            )
         context["month_sections"] = build_assignment_month_sections(self.object)
         return context
 
@@ -155,7 +189,7 @@ def must_be_yours(func):
         pk = kwargs["pk"]
         assignment = Assignment.objects.get(pk=pk)
         if not (assignment.tutor.id == request.user.id) and not request.user.is_superuser:
-            return HttpResponse("It is not your assignment! You are not permitted to add sessions to it!",
+            return HttpResponse("It is not your assignment! You are not permitted to update it!",
                         content_type="application/json", status=403)
         return func(request, *args, **kwargs)
     return check_and_call
@@ -181,6 +215,25 @@ class SessionUpdate(AssignmentOwnerMixin, UpdateView):
 class SessionDelete(AssignmentOwnerMixin, DeleteView):
     model = Session
     template_name = "tutoring/session_confirm_delete.html"
+
+    def get_success_url(self):
+        month_str = self.object.date.strftime('%Y-%m')
+        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
+
+
+class AttendanceAdjustmentUpdate(AssignmentOwnerMixin, UpdateView):
+    model = AttendanceAdjustment
+    form_class = AttendanceAdjustmentForm
+    template_name = "tutoring/adjustment_form.html"
+
+    def get_success_url(self):
+        month_str = self.object.date.strftime('%Y-%m')
+        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
+
+
+class AttendanceAdjustmentDelete(AssignmentOwnerMixin, DeleteView):
+    model = AttendanceAdjustment
+    template_name = "tutoring/adjustment_confirm_delete.html"
 
     def get_success_url(self):
         month_str = self.object.date.strftime('%Y-%m')
@@ -253,9 +306,6 @@ class MonthlyReportUpdate(AssignmentOwnerMixin, UpdateView):
         month_str = self.object.month.strftime('%Y-%m')
         return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
 
-    def get_success_url(self):
-        return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + "#previous-sessions"
-
 
 class MonthlyReportDelete(AssignmentOwnerMixin, DeleteView):
     model = MonthlyReport
@@ -269,6 +319,9 @@ class MonthlyReportDelete(AssignmentOwnerMixin, DeleteView):
 @csrf_protect
 @login_required
 def add_session(request, pk):
+    assignment = get_object_or_404(Assignment, pk=pk)
+    if assignment.is_monthly_billing:
+        return redirect(reverse('assignment-detail', kwargs={'pk': pk}))
     form = SessionForm(request.POST)
     if form.is_valid():
         new_session = form.save(commit=False)
@@ -278,19 +331,54 @@ def add_session(request, pk):
         return redirect(reverse('assignment-detail', kwargs={'pk': pk}) + f'#month-{month_str}')
     return redirect(reverse('assignment-detail', kwargs={'pk': pk}))
 
+
+@must_be_yours
+@csrf_protect
+@login_required
+def add_adjustment(request, pk):
+    assignment = get_object_or_404(Assignment, pk=pk)
+    if assignment.is_session_billing:
+        return redirect(reverse('assignment-detail', kwargs={'pk': pk}))
+
+    form = AttendanceAdjustmentForm(request.POST)
+    if form.is_valid():
+        new_adjustment = form.save(commit=False)
+        new_adjustment.assignment_id = pk
+        new_adjustment.save()
+        month_str = new_adjustment.date.strftime('%Y-%m')
+        return redirect(reverse('assignment-detail', kwargs={'pk': pk}) + f'#month-{month_str}')
+    return redirect(reverse('assignment-detail', kwargs={'pk': pk}))
+
 def calculate_totals(assignment, month, year):
     if month == 'all':
-        sessions = Session.objects.filter(assignment__id=assignment.id) ## add a aggregation to return ordered by month for details page
+        sessions = Session.objects.filter(assignment__id=assignment.id)
+        adjustments = AttendanceAdjustment.objects.filter(assignment__id=assignment.id)
         report = None
     else:
         sessions = Session.objects.filter(assignment__id=assignment.id).filter(date__month=month).filter(date__year=year)
+        adjustments = AttendanceAdjustment.objects.filter(assignment__id=assignment.id).filter(date__month=month).filter(date__year=year)
         report = MonthlyReport.objects.filter(
             assignment_id=assignment.id,
             month=datetime.date(year, month, 1),
         ).first()
+
     total_sessions = sessions.count()
-    total_earnings = total_sessions * assignment.session_rate
+    total_adjustments = adjustments.count()
+    if assignment.is_monthly_billing:
+        total_reduction = sum(
+            (adjustment.deduction_amount for adjustment in adjustments),
+            start=0,
+        )
+        total_earnings = (assignment.monthly_rate or 0) - total_reduction
+        assignment.activity_count = total_adjustments
+        assignment.activity_label = "הפחתות"
+    else:
+        total_earnings = total_sessions * assignment.session_rate
+        assignment.activity_count = total_sessions
+        assignment.activity_label = "שיעורים"
+
     assignment.total_sessions = total_sessions
+    assignment.total_adjustments = total_adjustments
     assignment.total_earnings = total_earnings
     assignment.monthly_report = report
 

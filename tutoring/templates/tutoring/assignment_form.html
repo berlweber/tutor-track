@@ -17,12 +17,51 @@
     {% endif %}
 </div>
 
-<form action="" method="post" class="form-container">
+<form action="" method="post" class="form-container assignment-form">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form.non_field_errors }}
+
+    <div class="form-grid">
+        <p>{{ form.student.label_tag }} {{ form.student }} {{ form.student.errors }}</p>
+        <p>{{ form.tutor.label_tag }} {{ form.tutor }} {{ form.tutor.errors }}</p>
+        <p class="full-width">{{ form.goal.label_tag }} {{ form.goal }} {{ form.goal.errors }}</p>
+        <div class="full-width billing-toggle">
+            <span class="field-label">{{ form.billing_mode.label }}</span>
+            {{ form.billing_mode }}
+            {{ form.billing_mode.errors }}
+        </div>
+        <p data-billing-section="session">{{ form.session_rate.label_tag }} {{ form.session_rate }} {{ form.session_rate.errors }}</p>
+        <p data-billing-section="month">{{ form.monthly_rate.label_tag }} {{ form.monthly_rate }} {{ form.monthly_rate.errors }}</p>
+        <p data-billing-section="month">{{ form.sessions_per_week.label_tag }} {{ form.sessions_per_week }} {{ form.sessions_per_week.errors }}</p>
+        <p>{{ form.sponsor.label_tag }} {{ form.sponsor }} {{ form.sponsor.errors }}</p>
+        <p>{{ form.start_time.label_tag }} {{ form.start_time }} {{ form.start_time.errors }}</p>
+        <p>{{ form.end_time.label_tag }} {{ form.end_time }} {{ form.end_time.errors }}</p>
+    </div>
+
     <div class="form-actions">
         <button type="submit" class='btn'>שמור</button>
         <a href="{% url 'assignment-list' %}" class="btn secondary">ביטול</a>
     </div>
 </form>
+
+<script>
+    (function () {
+        const form = document.querySelector(".assignment-form");
+        if (!form) return;
+
+        const radios = form.querySelectorAll('input[name="billing_mode"]');
+        const sections = form.querySelectorAll("[data-billing-section]");
+
+        function syncBillingMode() {
+            const checked = form.querySelector('input[name="billing_mode"]:checked');
+            const mode = checked ? checked.value : "session";
+            sections.forEach((section) => {
+                section.hidden = section.dataset.billingSection !== mode;
+            });
+        }
+
+        radios.forEach((radio) => radio.addEventListener("change", syncBillingMode));
+        syncBillingMode();
+    }());
+</script>
 {% endblock content %}

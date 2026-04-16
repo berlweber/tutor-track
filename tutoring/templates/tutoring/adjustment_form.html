@@ -1,0 +1,38 @@
+{% extends "base.html" %} {% load static %}
+{% block head %}
+<link rel="stylesheet" href="{% static "css/assignments/assignment-form.css" %}">
+{% endblock head %}
+{% block content %}
+<div class='page-header'>
+    <div>
+        <p class="eyebrow">עריכת דיווח</p>
+        <h1>עדכון איחור או חיסור</h1>
+    </div>
+</div>
+
+<form action="" method="post" class="form-container">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <p>{{ form.date.label_tag }} {{ form.date }} {{ form.date.errors }}</p>
+    <p>{{ form.adjustment_type.label_tag }} {{ form.adjustment_type }} {{ form.adjustment_type.errors }}</p>
+    <p id="late-duration-field">{{ form.duration.label_tag }} {{ form.duration }} {{ form.duration.errors }}</p>
+    <div class="form-actions">
+        <button type="submit" class='btn'>שמירת שינויים</button>
+        <a href="{% url 'assignment-detail' object.assignment.id %}" class="btn secondary">ביטול</a>
+    </div>
+</form>
+<script>
+    (function () {
+        const typeField = document.querySelector('select[name="adjustment_type"]');
+        const durationField = document.getElementById("late-duration-field");
+        if (!typeField || !durationField) return;
+
+        function syncAdjustmentFields() {
+            durationField.hidden = typeField.value !== "late";
+        }
+
+        typeField.addEventListener("change", syncAdjustmentFields);
+        syncAdjustmentFields();
+    }());
+</script>
+{% endblock content %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% load static %}
+{% block head %}
+<link rel="stylesheet" href="{% static "css/assignments/confirm-delete.css" %}">
+{% endblock head %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <p class="eyebrow">מחיקת דיווח</p>
+    <h1>מחיקת איחור או חיסור</h1>
+  </div>
+</div>
+<h2 class='confirm-text'>האם למחוק את הדיווח מתאריך <strong>{{ object.date|date:"d/m/Y" }}</strong>?</h2>
+
+<form action="" method="post" class="form">
+  {% csrf_token %}
+  <div class="confirm-actions">
+    <a href="{% url 'assignment-detail' object.assignment.id %}" class="btn secondary">ביטול</a>
+    <button type="submit" class="btn danger">כן, למחוק</button>
+  </div>
+</form>
+{% endblock content %}
