@@ -14,16 +14,15 @@
         <div class="month-nav">
             <form action="{% url "dashboard" %}" method="get">
                 <input type="hidden" name="month" value="{{ selected_month_value }}">
-                <button type="submit" class="btn secondary month-nav-btn" name="move" value="next">החודש הבא</button>
+                <button type="submit" class="btn secondary month-nav-btn" name="move" value="prev">החודש הקודם</button>
             </form>
             <form action="{% url "dashboard" %}" method="get">
                 <input type="hidden" name="month" value="{{ selected_month_value }}">
-                <button type="submit" class="btn secondary month-nav-btn" name="move" value="prev">החודש הקודם</button>
+                <button type="submit" class="btn secondary month-nav-btn" name="move" value="next">החודש הבא</button>
             </form>
         </div>
-        <form action="{% url "dashboard" %}" method="get">
+        <form action="{% url "dashboard" %}" method="get" class="js-auto-submit-on-month-change">
         {{ month_picker.as_p }}
-        <button type='submit' class="btn">הצג</button>
         </form>
     </div>
 </section>
