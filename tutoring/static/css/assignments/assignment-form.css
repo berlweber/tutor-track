@@ -108,11 +108,15 @@
 }
 
 .errorlist {
-  margin: 0.45rem 0 0;
-  padding: 0;
-  color: var(--danger);
+  margin: 0.55rem 0 0;
+  padding: 0.7rem 0.9rem;
   list-style: none;
-  font-weight: 700;
+  border-radius: 0.9rem;
+  background: rgba(185, 75, 75, 0.12);
+  color: #8d2222;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.5;
 }
 
 textarea {

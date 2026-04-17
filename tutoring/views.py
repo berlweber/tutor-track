@@ -213,6 +213,20 @@ def build_assignment_month_sections(assignment):
     return month_sections
 
 
+def build_assignment_detail_context(assignment, *, session_form=None, adjustment_form=None):
+    context = {
+        "assignment": assignment,
+        "month_sections": build_assignment_month_sections(assignment),
+    }
+    if assignment.is_monthly_billing:
+        context["adjustment_form"] = adjustment_form or AttendanceAdjustmentForm()
+    else:
+        context["session_form"] = session_form or SessionForm(
+            initial={"duration": assignment.session_length}
+        )
+    return context
+
+
 # Create your views here.
 class Home(LoginView):
     template_name = 'home.html'
@@ -254,13 +268,7 @@ class AssignmentDetail(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.object.is_monthly_billing:
-            context["adjustment_form"] = AttendanceAdjustmentForm()
-        else:
-            context["session_form"] = SessionForm(
-                initial={"duration": self.object.session_length}
-            )
-        context["month_sections"] = build_assignment_month_sections(self.object)
+        context.update(build_assignment_detail_context(self.object))
         return context
 
 class AssignmentUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -436,7 +444,12 @@ def add_session(request, pk):
         new_session.save()
         month_str = new_session.date.strftime('%Y-%m')
         return redirect(reverse('assignment-detail', kwargs={'pk': pk}) + f'#month-{month_str}')
-    return redirect(reverse('assignment-detail', kwargs={'pk': pk}))
+    return render(
+        request,
+        "tutoring/assignment_detail.html",
+        build_assignment_detail_context(assignment, session_form=form),
+        status=400,
+    )
 
 
 @must_be_yours

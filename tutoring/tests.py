@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 
-from .forms import AssignmentForm, AttendanceAdjustmentForm, StudentForm
+from .forms import AssignmentForm, AttendanceAdjustmentForm, SessionForm, StudentForm
 from .models import Assignment, AttendanceAdjustment, Session, Student
 from .views import (
     SORT_BY_STUDENT,
@@ -189,3 +189,32 @@ class BillingModeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Moshe Green")
         self.assertContains(response, "חזרה על הגמרא")
+
+    def test_session_form_requires_duration(self):
+        form = SessionForm(
+            data={
+                "date": "10/04/2026",
+                "duration": "",
+                "note": "",
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("duration", form.errors)
+
+    def test_add_session_missing_date_rerenders_assignment_with_error(self):
+        assignment = self.create_assignment()
+        self.client.force_login(self.tutor)
+
+        response = self.client.post(
+            f"/assignment/{assignment.id}/add-session/",
+            data={
+                "date": "",
+                "duration": "01:00",
+                "note": "",
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, "נא לבחור תאריך.", status_code=400)
+        self.assertEqual(Session.objects.filter(assignment=assignment).count(), 0)

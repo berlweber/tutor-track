@@ -111,7 +111,7 @@ class AssignmentForm(forms.ModelForm):
 class SessionForm(forms.ModelForm):
     duration = HHMMDurationField(
         label="משך זמן הלימוד",
-        required=False,
+        required=True,
         widget=forms.TextInput(
             attrs={
                 "placeholder": "שעות:דקות",
@@ -154,8 +154,7 @@ class SessionForm(forms.ModelForm):
         self.fields["date"].input_formats = ["%d/%m/%Y", "%Y-%m-%d"]
         self.fields["date"].error_messages["required"] = "נא לבחור תאריך."
         self.fields["date"].error_messages["invalid"] = "נא להזין תאריך בפורמט יום/חודש/שנה."
-        if self.fields["duration"].required:
-            self.fields["duration"].error_messages["required"] = "נא להזין משך שיעור."
+        self.fields["duration"].error_messages["required"] = "נא להזין משך שיעור."
 
 
 class AttendanceAdjustmentForm(forms.ModelForm):

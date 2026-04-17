@@ -118,18 +118,38 @@ function initFlatpickrTimePickers() {
 
 function initValidationMessages() {
   document.querySelectorAll("form").forEach((form) => {
-    form.querySelectorAll("input, select, textarea").forEach((field) => {
-      field.addEventListener("invalid", () => {
-        field.setCustomValidity(getHebrewValidationMessage(field));
-      });
+    form.noValidate = true;
+    const fields = form.querySelectorAll("input, select, textarea");
 
+    fields.forEach((field) => {
       field.addEventListener("input", () => {
         field.setCustomValidity("");
+        clearValidationTooltip(field);
       });
 
       field.addEventListener("change", () => {
         field.setCustomValidity("");
+        clearValidationTooltip(field);
       });
+    });
+
+    form.addEventListener("submit", (event) => {
+      clearFormValidationTooltips(form);
+
+      const firstInvalidField = Array.from(fields).find((field) => {
+        const validationMessage = getClientSideValidationMessage(field);
+        field.setCustomValidity(validationMessage);
+        return Boolean(validationMessage);
+      });
+
+      if (!firstInvalidField) {
+        return;
+      }
+
+      event.preventDefault();
+      suppressCustomPickerForValidation(firstInvalidField);
+      showValidationTooltip(firstInvalidField, getHebrewValidationMessage(firstInvalidField));
+      scrollFieldIntoView(firstInvalidField);
     });
   });
 }
@@ -187,17 +207,26 @@ function mountCustomPicker(state) {
   renderCustomPicker(state);
 
   state.input.addEventListener("focus", () => {
+    if (state.input.dataset.validationSuppressPicker === "true") {
+      return;
+    }
     openCustomPicker(state);
   });
 
   state.input.addEventListener("click", (event) => {
     event.preventDefault();
+    if (state.input.dataset.validationSuppressPicker === "true") {
+      return;
+    }
     openCustomPicker(state);
   });
 
   state.input.addEventListener("keydown", (event) => {
     if (["Enter", " ", "ArrowDown"].includes(event.key)) {
       event.preventDefault();
+      if (state.input.dataset.validationSuppressPicker === "true") {
+        return;
+      }
       openCustomPicker(state);
     }
   });
@@ -230,6 +259,75 @@ function closeCustomPicker(state) {
   state.wrapper.classList.remove("is-picker-open");
   state.input.setAttribute("aria-expanded", "false");
   state.isOpen = false;
+}
+
+function suppressCustomPickerForValidation(field) {
+  if (!field.classList.contains("custom-picker-input")) {
+    return;
+  }
+
+  const state = customPickerStates.find((pickerState) => pickerState.input === field);
+  if (state) {
+    closeCustomPicker(state);
+  }
+
+  field.dataset.validationSuppressPicker = "true";
+  window.setTimeout(() => {
+    delete field.dataset.validationSuppressPicker;
+  }, 250);
+}
+
+function showValidationTooltip(field, message) {
+  if (!message) {
+    return;
+  }
+
+  const wrapper = getValidationFieldWrapper(field);
+  if (!wrapper) {
+    return;
+  }
+
+  clearValidationTooltip(field);
+
+  const tooltip = document.createElement("div");
+  tooltip.className = "field-validation-tooltip";
+  tooltip.textContent = message;
+
+  field.setAttribute("aria-invalid", "true");
+  wrapper.classList.add("has-validation-tooltip");
+  wrapper.appendChild(tooltip);
+}
+
+function clearValidationTooltip(field) {
+  const wrapper = getValidationFieldWrapper(field);
+  if (!wrapper) {
+    return;
+  }
+
+  wrapper.classList.remove("has-validation-tooltip");
+  wrapper.querySelectorAll(".field-validation-tooltip").forEach((tooltip) => {
+    tooltip.remove();
+  });
+  field.removeAttribute("aria-invalid");
+}
+
+function clearFormValidationTooltips(form) {
+  form.querySelectorAll("input, select, textarea").forEach((field) => {
+    clearValidationTooltip(field);
+  });
+}
+
+function getValidationFieldWrapper(field) {
+  return field.closest("p") || field.parentElement;
+}
+
+function scrollFieldIntoView(field) {
+  const wrapper = getValidationFieldWrapper(field);
+  if (!wrapper) {
+    return;
+  }
+
+  wrapper.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function renderCustomPicker(state) {
@@ -476,6 +574,11 @@ function formatMonthValue(date) {
 }
 
 function getHebrewValidationMessage(field) {
+  const clientSideMessage = getClientSideValidationMessage(field);
+  if (clientSideMessage) {
+    return clientSideMessage;
+  }
+
   const { validity, tagName, dataset } = field;
 
   if (validity.valueMissing) {
@@ -490,6 +593,9 @@ function getHebrewValidationMessage(field) {
     }
     if (dataset.pickerType === "time") {
       return "נא לבחור שעה.";
+    }
+    if (dataset.pickerType === "duration") {
+      return "נא להזין משך שיעור.";
     }
     return "נא למלא שדה זה.";
   }
@@ -515,4 +621,38 @@ function getHebrewValidationMessage(field) {
   }
 
   return "יש לתקן את השדה הזה.";
+}
+
+function getClientSideValidationMessage(field) {
+  if (field.disabled) {
+    return "";
+  }
+
+  const value = typeof field.value === "string" ? field.value.trim() : field.value;
+  const { dataset, tagName, required } = field;
+
+  if (required && !value) {
+    if (tagName === "SELECT") {
+      return "נא לבחור ערך מהרשימה.";
+    }
+    if (dataset.pickerType === "date") {
+      return "נא לבחור תאריך.";
+    }
+    if (dataset.pickerType === "month") {
+      return "נא לבחור חודש.";
+    }
+    if (dataset.pickerType === "time") {
+      return "נא לבחור שעה.";
+    }
+    if (dataset.pickerType === "duration") {
+      return "נא להזין משך שיעור.";
+    }
+    return "נא למלא שדה זה.";
+  }
+
+  if (dataset.pickerType === "duration" && value && !/^\d+:\d{2}$/.test(value)) {
+    return "נא להזין משך בפורמט שעות:דקות, לדוגמה 01:30.";
+  }
+
+  return "";
 }

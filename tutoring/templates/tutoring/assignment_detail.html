@@ -179,9 +179,10 @@
     </div>
     <h3>הוספת שיעור</h3>
     <form
-    action="{% url "add-session" assignment.id %}"
+    action="{% url "add-session" assignment.id %}#new-session-form"
     method="post"
     class="subsection-content"
+    id="new-session-form"
     autocomplete="off"
     >
     {% csrf_token %}
@@ -190,6 +191,11 @@
         <button type='submit' class='btn submit'>הוספת שיעור</button>
     </div>
     </form>
+    {% if session_form.errors %}
+    <script>
+        document.getElementById("new-session-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    </script>
+    {% endif %}
     <h3 id="previous-sessions">שיעורים קודמים</h3>
     {% for month_section in month_sections %}
     <article class="month-block" id="month-{{ month_section.month|date:'Y-m' }}">
