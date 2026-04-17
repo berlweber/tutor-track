@@ -161,6 +161,37 @@ class Assignment(models.Model):
             Decimal(self.monthly_rate) / self.expected_sessions_per_month
         ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
+    def calculate_session_earnings(self, session_duration):
+        session_length_seconds = (
+            self.session_length.total_seconds()
+            if self.session_length
+            else 0
+        )
+        if not session_duration or session_length_seconds <= 0:
+            return Decimal("0.00")
+
+        duration_ratio = Decimal(str(session_duration.total_seconds())) / Decimal(
+            str(session_length_seconds)
+        )
+        return (self.session_rate * duration_ratio).quantize(
+            Decimal("0.01"),
+            rounding=ROUND_HALF_UP,
+        )
+
+    def calculate_equivalent_sessions(self, total_duration):
+        session_length_seconds = (
+            self.session_length.total_seconds()
+            if self.session_length
+            else 0
+        )
+        if not total_duration or session_length_seconds <= 0:
+            return Decimal("0.00")
+
+        return (
+            Decimal(str(total_duration.total_seconds()))
+            / Decimal(str(session_length_seconds))
+        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
     def clean(self):
         super().clean()
 

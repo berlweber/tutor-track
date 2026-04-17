@@ -33,6 +33,13 @@
   margin: 0;
 }
 
+.dashboard-filter-help {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  text-align: right;
+}
+
 .dashboard-sort-toolbar {
   display: block;
   width: 100%;

@@ -89,7 +89,31 @@ class BillingModeTests(TestCase):
 
         self.assertEqual(assignment.total_sessions, 2)
         self.assertEqual(assignment.total_earnings, Decimal("300.00"))
-        self.assertEqual(assignment.activity_label, "שיעורים")
+        self.assertEqual(assignment.activity_count, Decimal("2.00"))
+        self.assertEqual(assignment.activity_label, "שיעורים לפי שעות")
+
+    def test_per_session_dashboard_total_scales_with_shorter_and_longer_sessions(self):
+        assignment = self.create_assignment(
+            session_rate=Decimal("150.00"),
+            session_length=datetime.timedelta(hours=1),
+        )
+        Session.objects.create(
+            assignment=assignment,
+            date=datetime.date(2026, 4, 2),
+            duration=datetime.timedelta(minutes=30),
+        )
+        Session.objects.create(
+            assignment=assignment,
+            date=datetime.date(2026, 4, 9),
+            duration=datetime.timedelta(hours=2),
+        )
+
+        assignment = calculate_totals(assignment, 4, 2026)
+
+        self.assertEqual(assignment.total_sessions, 2)
+        self.assertEqual(assignment.activity_count, Decimal("2.50"))
+        self.assertEqual(assignment.total_earnings, Decimal("375.00"))
+        self.assertEqual(assignment.activity_label, "שיעורים לפי שעות")
 
     def test_assignment_form_renders_billing_mode_choices(self):
         form = AssignmentForm()

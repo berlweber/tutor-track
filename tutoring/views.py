@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from decimal import Decimal
 from django.db.models import Case, CharField, F, Value, When
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.views import LoginView
@@ -198,14 +199,20 @@ def build_assignment_month_sections(assignment):
                 start=datetime.timedelta(0),
             )
             total_sessions = len(month_items)
+            equivalent_sessions = assignment.calculate_equivalent_sessions(total_duration)
+            total_earnings = sum(
+                (assignment.calculate_session_earnings(session.duration) for session in month_items),
+                start=Decimal("0.00"),
+            )
             month_sections.append(
                 {
                     "month": month_key,
                     "month_display": month_label(month_key),
                     "sessions": month_items,
                     "total_duration": format_duration_hhmm(total_duration),
-                    "total_earnings": total_sessions * assignment.session_rate,
+                    "total_earnings": total_earnings,
                     "total_sessions": total_sessions,
+                    "equivalent_sessions": equivalent_sessions,
                     "report": reports_by_month.get(month_key),
                 }
             )
@@ -493,9 +500,16 @@ def calculate_totals(assignment, month, year):
         assignment.activity_count = total_adjustments
         assignment.activity_label = "הפחתות"
     else:
-        total_earnings = total_sessions * assignment.session_rate
-        assignment.activity_count = total_sessions
-        assignment.activity_label = "שיעורים"
+        total_duration = sum(
+            (session.duration or datetime.timedelta(0) for session in sessions),
+            start=datetime.timedelta(0),
+        )
+        total_earnings = sum(
+            (assignment.calculate_session_earnings(session.duration) for session in sessions),
+            start=Decimal("0.00"),
+        )
+        assignment.activity_count = assignment.calculate_equivalent_sessions(total_duration)
+        assignment.activity_label = "שיעורים לפי שעות"
 
     assignment.total_sessions = total_sessions
     assignment.total_adjustments = total_adjustments
@@ -509,7 +523,9 @@ def dashboard(request):
     selected_month = month_start(datetime.date.today())
     current_sort = get_assignment_sort_mode(request)
 
-    if request.method == 'GET':
+    has_month_submission = any(key in request.GET for key in ("month", "move"))
+
+    if request.method == 'GET' and has_month_submission:
         form = MonthPickerForm(request.GET)
         if form.is_valid():
             selected_month = month_start(form.cleaned_data["month"])
@@ -519,6 +535,8 @@ def dashboard(request):
                     -1 if request.GET["move"] == "prev" else 1,
                 )
                 form = MonthPickerForm(initial={"month": selected_month})
+        else:
+            form = MonthPickerForm(initial={"month": selected_month})
     else:
         form = MonthPickerForm(initial={"month": selected_month})
 
