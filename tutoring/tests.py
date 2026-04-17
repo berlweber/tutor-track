@@ -2,17 +2,23 @@ import datetime
 from decimal import Decimal
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import Client, TestCase
 
-from .forms import AssignmentForm, AttendanceAdjustmentForm
+from .forms import AssignmentForm, AttendanceAdjustmentForm, StudentForm
 from .models import Assignment, AttendanceAdjustment, Session, Student
-from .views import calculate_totals
+from .views import (
+    SORT_BY_STUDENT,
+    SORT_BY_TUTOR,
+    calculate_totals,
+    sort_assignments_for_display,
+)
 
 
 class BillingModeTests(TestCase):
     def setUp(self):
+        self.client = Client()
         self.tutor = User.objects.create_user(username="avrech", password="secret")
-        self.student = Student.objects.create(name="Moshe")
+        self.student = Student.objects.create(first_name="Moshe", last_name="Green")
 
     def create_assignment(self, **overrides):
         defaults = {
@@ -119,3 +125,67 @@ class BillingModeTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn("duration", form.errors)
+
+    def test_student_display_name_uses_new_format(self):
+        self.assertEqual(str(self.student), 'הבה"ח Moshe Green ני"ו')
+
+    def test_student_falls_back_to_legacy_name_as_last_name(self):
+        student = Student.objects.create(name="Weiss")
+
+        self.assertEqual(student.last_name, "Weiss")
+        self.assertEqual(str(student), 'הבה"ח Weiss ני"ו')
+
+    def test_student_form_only_exposes_first_and_last_name(self):
+        form = StudentForm()
+
+        self.assertEqual(list(form.fields.keys()), ["first_name", "last_name"])
+
+    def test_student_sort_orders_by_student_then_tutor_last_name(self):
+        student_a = Student.objects.create(first_name="A", last_name="כהן")
+        student_b = Student.objects.create(first_name="B", last_name="לוי")
+        tutor_a = User.objects.create_user(username="tutor-a", password="secret", last_name="ברק")
+        tutor_b = User.objects.create_user(username="tutor-b", password="secret", last_name="דוד")
+
+        assignment_1 = self.create_assignment(student=student_a, tutor=tutor_b)
+        assignment_2 = self.create_assignment(student=student_a, tutor=tutor_a)
+        assignment_3 = self.create_assignment(student=student_b, tutor=tutor_a)
+
+        sorted_assignments = sort_assignments_for_display(
+            [assignment_1, assignment_2, assignment_3],
+            SORT_BY_STUDENT,
+        )
+
+        self.assertEqual(
+            [assignment.id for assignment in sorted_assignments],
+            [assignment_2.id, assignment_1.id, assignment_3.id],
+        )
+
+    def test_tutor_sort_orders_by_tutor_then_student_last_name(self):
+        student_a = Student.objects.create(first_name="A", last_name="כהן")
+        student_b = Student.objects.create(first_name="B", last_name="לוי")
+        tutor_a = User.objects.create_user(username="tutor-a", password="secret", last_name="ברק")
+        tutor_b = User.objects.create_user(username="tutor-b", password="secret", last_name="דוד")
+
+        assignment_1 = self.create_assignment(student=student_b, tutor=tutor_a)
+        assignment_2 = self.create_assignment(student=student_a, tutor=tutor_a)
+        assignment_3 = self.create_assignment(student=student_a, tutor=tutor_b)
+
+        sorted_assignments = sort_assignments_for_display(
+            [assignment_1, assignment_2, assignment_3],
+            SORT_BY_TUTOR,
+        )
+
+        self.assertEqual(
+            [assignment.id for assignment in sorted_assignments],
+            [assignment_2.id, assignment_1.id, assignment_3.id],
+        )
+
+    def test_assignment_list_page_shows_assignments(self):
+        self.create_assignment()
+        self.client.force_login(self.tutor)
+
+        response = self.client.get("/assignments/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Moshe Green")
+        self.assertContains(response, "חזרה על הגמרא")

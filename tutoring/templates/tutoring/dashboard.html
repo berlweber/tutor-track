@@ -14,16 +14,28 @@
         <div class="month-nav">
             <form action="{% url "dashboard" %}" method="get">
                 <input type="hidden" name="month" value="{{ selected_month_value }}">
+                <input type="hidden" name="sort" value="{{ current_sort }}">
                 <button type="submit" class="btn secondary month-nav-btn" name="move" value="prev">החודש הקודם</button>
             </form>
             <form action="{% url "dashboard" %}" method="get">
                 <input type="hidden" name="month" value="{{ selected_month_value }}">
+                <input type="hidden" name="sort" value="{{ current_sort }}">
                 <button type="submit" class="btn secondary month-nav-btn" name="move" value="next">החודש הבא</button>
             </form>
         </div>
         <form action="{% url "dashboard" %}" method="get" class="js-auto-submit-on-month-change">
+        <input type="hidden" name="sort" value="{{ current_sort }}">
         {{ month_picker.as_p }}
         </form>
+    </div>
+</section>
+<section class="dashboard-sort-toolbar">
+    <div class="sort-toggle-panel dashboard-sort-panel">
+        <p class="sort-toggle-label">מיון לפי</p>
+        <div class="sort-toggle">
+            <a href="{% url "dashboard" %}?month={{ selected_month_value }}&sort=student" class="sort-toggle-option {% if current_sort == 'student' %}is-active{% endif %}">תלמיד</a>
+            <a href="{% url "dashboard" %}?month={{ selected_month_value }}&sort=tutor" class="sort-toggle-option {% if current_sort == 'tutor' %}is-active{% endif %}">אברך</a>
+        </div>
     </div>
 </section>
 

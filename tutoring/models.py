@@ -48,13 +48,41 @@ def month_label(date_value):
 
 # Create your models here.
 class Student(models.Model):
-    name = models.CharField('שם התלמיד', max_length=50)
+    name = models.CharField('שם התלמיד', max_length=50, blank=True, default="")
+    first_name = models.CharField("שם פרטי", max_length=50, blank=True, default="")
+    last_name = models.CharField("שם משפחה", max_length=50, blank=True, default="")
+
+    @property
+    def resolved_last_name(self):
+        return (self.last_name or self.name or "").strip()
+
+    @property
+    def display_name(self):
+        parts = [part for part in [self.first_name.strip(), self.resolved_last_name] if part]
+        full_name = " ".join(parts)
+        if not full_name:
+            return 'הבה"ח ני"ו'
+        return f'הבה"ח {full_name} ני"ו'
+
+    def clean(self):
+        super().clean()
+        if not self.last_name and self.name:
+            self.last_name = self.name.strip()
+        if not self.name and self.last_name:
+            self.name = self.last_name.strip()
 
     def get_absolute_url(self):
         return reverse("assignment-create")
 
+    def save(self, *args, **kwargs):
+        if not self.last_name and self.name:
+            self.last_name = self.name.strip()
+        if not self.name and self.last_name:
+            self.name = self.last_name.strip()
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return self.name
+        return self.display_name
 
 SPONSORS = (
     ('P', 'הורים'),

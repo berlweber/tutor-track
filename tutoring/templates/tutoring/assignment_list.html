@@ -4,9 +4,16 @@
 {% endblock head %}
 {% block content %}
 <section class='page-header'>
-    <div>
+    <div class="page-header-content">
         <p class="eyebrow">מרכז השיבוצים</p>
         <h1>שיבוצים</h1>
+        <div class="sort-toggle-panel assignment-sort-panel">
+            <p class="sort-toggle-label">מיון לפי</p>
+            <div class="sort-toggle">
+                <a href="{% url "assignment-list" %}?sort=student" class="sort-toggle-option {% if current_sort == 'student' %}is-active{% endif %}">תלמיד</a>
+                <a href="{% url "assignment-list" %}?sort=tutor" class="sort-toggle-option {% if current_sort == 'tutor' %}is-active{% endif %}">אברך</a>
+            </div>
+        </div>
     </div>
     {% if user.is_superuser %}
     <button class='btn' onclick="location.href='{% url "assignment-create" %}'" type="button">שיבוץ חדש</button>

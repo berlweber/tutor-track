@@ -3,6 +3,24 @@
   min-width: 10rem;
 }
 
+.page-header-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.page-header-content .eyebrow,
+.page-header-content h1 {
+  width: 100%;
+  text-align: right;
+}
+
+.assignment-sort-panel {
+  margin-top: 0.85rem;
+}
+
 .card-container {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -68,6 +86,10 @@
 }
 
 @media (max-width: 860px) {
+  .assignment-sort-panel {
+    margin-top: 0.6rem;
+  }
+
   .card-container {
     grid-template-columns: 1fr;
   }

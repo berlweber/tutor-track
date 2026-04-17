@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from django.db.models import Case, CharField, F, Value, When
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.views import LoginView
 from django.urls import reverse, reverse_lazy
@@ -27,7 +28,13 @@ from .forms import (
     MonthlyReportForm,
     MonthPickerForm,
     SessionForm,
+    StudentForm,
 )
+
+
+SORT_BY_STUDENT = "student"
+SORT_BY_TUTOR = "tutor"
+ASSIGNMENT_SORT_CHOICES = {SORT_BY_STUDENT, SORT_BY_TUTOR}
 
 
 def calculate_session_length(start_time, end_time):
@@ -44,6 +51,102 @@ def shift_month(date_value, delta):
     year = date_value.year + ((date_value.month - 1 + delta) // 12)
     month = ((date_value.month - 1 + delta) % 12) + 1
     return datetime.date(year, month, 1)
+
+
+def get_assignment_sort_mode(request):
+    sort_mode = request.GET.get("sort", SORT_BY_STUDENT)
+    if sort_mode not in ASSIGNMENT_SORT_CHOICES:
+        return SORT_BY_STUDENT
+    return sort_mode
+
+
+def user_last_name_for_sort(user):
+    if not user:
+        return ""
+    return (user.last_name or user.username or "").strip()
+
+
+def user_first_name_for_sort(user):
+    if not user:
+        return ""
+    return (user.first_name or user.username or "").strip()
+
+
+def assignment_sort_key(assignment, sort_mode):
+    student_last_name = assignment.student.resolved_last_name
+    student_first_name = (assignment.student.first_name or "").strip()
+    tutor_last_name = user_last_name_for_sort(assignment.tutor)
+    tutor_first_name = user_first_name_for_sort(assignment.tutor)
+
+    if sort_mode == SORT_BY_TUTOR:
+        return (
+            tutor_last_name,
+            tutor_first_name,
+            student_last_name,
+            student_first_name,
+            assignment.pk,
+        )
+
+    return (
+        student_last_name,
+        student_first_name,
+        tutor_last_name,
+        tutor_first_name,
+        assignment.pk,
+    )
+
+
+def sort_assignments_for_display(assignments, sort_mode):
+    return sorted(assignments, key=lambda assignment: assignment_sort_key(assignment, sort_mode))
+
+
+def order_assignments_queryset(queryset, sort_mode):
+    queryset = queryset.annotate(
+        student_last_name_sort=Case(
+            When(student__last_name="", then=F("student__name")),
+            default=F("student__last_name"),
+            output_field=CharField(),
+        ),
+        tutor_last_name_sort=Case(
+            When(tutor__last_name="", then=F("tutor__username")),
+            default=F("tutor__last_name"),
+            output_field=CharField(),
+        ),
+        tutor_first_name_sort=Case(
+            When(tutor__first_name="", then=F("tutor__username")),
+            default=F("tutor__first_name"),
+            output_field=CharField(),
+        ),
+        student_first_name_sort=Case(
+            When(student__first_name="", then=Value("")),
+            default=F("student__first_name"),
+            output_field=CharField(),
+        ),
+    )
+
+    if sort_mode == SORT_BY_TUTOR:
+        return queryset.order_by(
+            "tutor_last_name_sort",
+            "tutor_first_name_sort",
+            "student_last_name_sort",
+            "student_first_name_sort",
+            "pk",
+        )
+
+    return queryset.order_by(
+        "student_last_name_sort",
+        "student_first_name_sort",
+        "tutor_last_name_sort",
+        "tutor_first_name_sort",
+        "pk",
+    )
+
+
+def get_visible_assignments(request):
+    queryset = Assignment.objects.select_related("student", "tutor")
+    if request.user.is_superuser:
+        return queryset
+    return queryset.filter(tutor=request.user)
 
 
 def build_assignment_month_sections(assignment):
@@ -117,12 +220,16 @@ class Home(LoginView):
 
 class AssignmentList(LoginRequiredMixin, ListView):
     model = Assignment
+    template_name = "tutoring/assignment_list.html"
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return Assignment.objects.all()
-        else:
-            return Assignment.objects.filter(tutor = self.request.user)
+        assignments = get_visible_assignments(self.request)
+        return order_assignments_queryset(assignments, get_assignment_sort_mode(self.request))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["current_sort"] = get_assignment_sort_mode(self.request)
+        return context
 
 class AssignmentCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Assignment
@@ -179,7 +286,7 @@ class AssignmentDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 class StudentCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Student
-    fields = '__all__'
+    form_class = StudentForm
 
     def test_func(self):
         return self.request.user.is_superuser
@@ -387,6 +494,7 @@ def calculate_totals(assignment, month, year):
 @login_required
 def dashboard(request):
     selected_month = month_start(datetime.date.today())
+    current_sort = get_assignment_sort_mode(request)
 
     if request.method == 'GET':
         form = MonthPickerForm(request.GET)
@@ -404,11 +512,7 @@ def dashboard(request):
     year = selected_month.year
     month = selected_month.month
 
-    assignments = ''
-    if request.user.is_superuser:
-        assignments = Assignment.objects.all()
-    else:
-        assignments = Assignment.objects.filter(tutor = request.user)
+    assignments = order_assignments_queryset(get_visible_assignments(request), current_sort)
 
     school_assignments = []
     parents_assignments = []
@@ -441,6 +545,7 @@ def dashboard(request):
         'month': HEBREW_MONTHS[month],
         'year': year,
         'month_picker': form,
+        'current_sort': current_sort,
         'selected_month_value': selected_month.strftime("%Y-%m"),
         'prev_month_value': shift_month(selected_month, -1).strftime("%Y-%m"),
         'next_month_value': shift_month(selected_month, 1).strftime("%Y-%m"),

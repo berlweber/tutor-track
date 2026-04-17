@@ -1,7 +1,7 @@
 .dashboard-hero {
   display: flex;
   justify-content: space-between;
-  align-items: end;
+  align-items: flex-start;
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -31,6 +31,19 @@
 
 .dashboard-filter form {
   margin: 0;
+}
+
+.dashboard-sort-toolbar {
+  display: block;
+  width: 100%;
+  margin: -0.4rem 0 1.1rem;
+}
+
+.dashboard-sort-panel {
+  margin-top: 0;
+  width: max-content;
+  margin-left: auto;
+  margin-right: 0;
 }
 
 .month-nav {
@@ -187,10 +200,21 @@
 }
 
 @media (max-width: 960px) {
-  .dashboard-hero,
+  .dashboard-hero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-filter {
+    min-width: 0;
+  }
+
+  .dashboard-sort-panel {
+    align-self: flex-end;
+  }
+
   .summary-grid {
     grid-template-columns: 1fr;
-    display: grid;
   }
 
   .dashboard-row {

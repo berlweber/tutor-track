@@ -8,6 +8,7 @@ from .models import (
     AttendanceAdjustment,
     MonthlyReport,
     Session,
+    Student,
     format_user_display,
 )
 
@@ -269,6 +270,23 @@ class MonthlyReportForm(forms.ModelForm):
     def clean_month(self):
         month = self.cleaned_data["month"]
         return month.replace(day=1)
+
+
+class StudentForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        fields = ["first_name", "last_name"]
+        labels = {
+            "first_name": "שם פרטי",
+            "last_name": "שם משפחה",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True
+        self.fields["first_name"].error_messages["required"] = "נא למלא שם פרטי."
+        self.fields["last_name"].error_messages["required"] = "נא למלא שם משפחה."
 
 
 class LoginForm(AuthenticationForm):
