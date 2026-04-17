@@ -242,3 +242,13 @@ class BillingModeTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertContains(response, "נא לבחור תאריך.", status_code=400)
         self.assertEqual(Session.objects.filter(assignment=assignment).count(), 0)
+
+    def test_dashboard_initial_month_picker_renders_without_day(self):
+        self.create_assignment()
+        self.client.force_login(self.tutor)
+
+        response = self.client.get("/assignments/dashboard/")
+
+        self.assertEqual(response.status_code, 200)
+        today = datetime.date.today().replace(day=1)
+        self.assertContains(response, f'value="{today.strftime("%Y-%m")}"')

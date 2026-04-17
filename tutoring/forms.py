@@ -218,6 +218,7 @@ class MonthPickerForm(forms.Form):
     month = forms.DateField(
         label="חודש",
         widget=forms.DateInput(
+            format="%Y-%m",
             attrs={
                 "lang": "he-IL",
                 "class": "js-he-month",
@@ -244,6 +245,7 @@ class MonthlyReportForm(forms.ModelForm):
         }
         widgets = {
             "month": forms.DateInput(
+                format="%Y-%m",
                 attrs={
                     "lang": "he-IL",
                     "class": "js-he-month",
