@@ -46,6 +46,20 @@ def month_label(date_value):
         return ""
     return f"{HEBREW_MONTHS[date_value.month]} {date_value.year}"
 
+
+def format_session_equivalent(value):
+    if value in (None, ""):
+        return ""
+
+    if not isinstance(value, Decimal):
+        value = Decimal(str(value))
+
+    rounded_value = value.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+    if rounded_value == rounded_value.to_integral():
+        return str(int(rounded_value))
+
+    return format(rounded_value.normalize(), "f")
+
 # Create your models here.
 class Student(models.Model):
     name = models.CharField('שם התלמיד', max_length=50, blank=True, default="")

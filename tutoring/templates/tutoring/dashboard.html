@@ -81,7 +81,7 @@
                 <div>{{ assignment.student }}</div>
                 <div>{{ assignment.tutor_display_name }}</div>
                 <div>{{ assignment.get_billing_mode_display }}</div>
-                <div>{{ assignment.activity_count }} {{ assignment.activity_label }}</div>
+                <div>{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</div>
                 <div>{{ assignment.total_earnings }}</div>
                 <div>{{ assignment.goal }}</div>
                 <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>
@@ -114,7 +114,7 @@
                 <div>{{ assignment.student }}</div>
                 <div>{{ assignment.tutor_display_name }}</div>
                 <div>{{ assignment.get_billing_mode_display }}</div>
-                <div>{{ assignment.activity_count }} {{ assignment.activity_label }}</div>
+                <div>{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</div>
                 <div>{{ assignment.total_earnings }}</div>
                 <div>{{ assignment.goal }}</div>
                 <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>
@@ -147,7 +147,7 @@
                 <div>{{ assignment.student }}</div>
                 <div>{{ assignment.tutor_display_name }}</div>
                 <div>{{ assignment.get_billing_mode_display }}</div>
-                <div>{{ assignment.activity_count }} {{ assignment.activity_label }}</div>
+                <div>{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</div>
                 <div>{{ assignment.total_earnings }}</div>
                 <div>{{ assignment.goal }}</div>
                 <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>

@@ -20,6 +20,7 @@ from .models import (
     Session,
     HEBREW_MONTHS,
     format_duration_hhmm,
+    format_session_equivalent,
     month_label,
 )
 from .forms import (
@@ -213,6 +214,7 @@ def build_assignment_month_sections(assignment):
                     "total_earnings": total_earnings,
                     "total_sessions": total_sessions,
                     "equivalent_sessions": equivalent_sessions,
+                    "equivalent_sessions_display": format_session_equivalent(equivalent_sessions),
                     "report": reports_by_month.get(month_key),
                 }
             )
@@ -509,6 +511,7 @@ def calculate_totals(assignment, month, year):
             start=Decimal("0.00"),
         )
         assignment.activity_count = assignment.calculate_equivalent_sessions(total_duration)
+        assignment.activity_count_display = format_session_equivalent(assignment.activity_count)
         assignment.activity_label = "שיעורים לפי שעות"
 
     assignment.total_sessions = total_sessions
