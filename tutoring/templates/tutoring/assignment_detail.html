@@ -1,6 +1,7 @@
 {% extends "base.html" %} {% load static %}
 {% block head %}
 <link rel="stylesheet" href="{% static "css/assignments/assignment-detail.css" %}">
+<link rel="stylesheet" href="{% static 'css/report-toggle.css' %}">
 {% endblock head %}
 {% block content %}
 <section class="page-header detail-header">
@@ -156,7 +157,12 @@
                     <a href="{% url 'report-delete' month_section.report.id %}" class="table-action danger-link">מחיקה</a>
                 </div>
             </div>
-            <p>{{ month_section.report.content|linebreaksbr }}</p>
+            <div class="report-snippet report-snippet--card">
+                <div class="report-toggle js-report-toggle" role="button" tabindex="0" aria-expanded="false" data-more-label="הצג עוד" data-less-label="הצג פחות">
+                    <div class="report-toggle-text">{{ month_section.report.content|linebreaksbr }}</div>
+                    <span class="report-toggle-label">הצג עוד</span>
+                </div>
+            </div>
             <div class="report-meta">עודכן לאחרונה: {{ month_section.report.updated_at|date:"d/m/Y" }}</div>
         </article>
         {% else %}
@@ -263,7 +269,12 @@
                     <a href="{% url 'report-delete' month_section.report.id %}" class="table-action danger-link">מחיקה</a>
                 </div>
             </div>
-            <p>{{ month_section.report.content|linebreaksbr }}</p>
+            <div class="report-snippet report-snippet--card">
+                <div class="report-toggle js-report-toggle" role="button" tabindex="0" aria-expanded="false" data-more-label="הצג עוד" data-less-label="הצג פחות">
+                    <div class="report-toggle-text">{{ month_section.report.content|linebreaksbr }}</div>
+                    <span class="report-toggle-label">הצג עוד</span>
+                </div>
+            </div>
             <div class="report-meta">עודכן לאחרונה: {{ month_section.report.updated_at|date:"d/m/Y" }}</div>
         </article>
         {% else %}
@@ -305,3 +316,6 @@
 </script>
 {% endif %}
 {% endblock content %}
+{% block scripts %}
+<script src="{% static 'js/report-toggle.js' %}"></script>
+{% endblock scripts %}

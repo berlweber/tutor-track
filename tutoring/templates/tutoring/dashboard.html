@@ -1,6 +1,7 @@
 {% extends "base.html" %} {% load static %}
 {% block head %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/report-toggle.css' %}">
 {% endblock head %}
 {% block content %}
 <section class="dashboard-hero">
@@ -84,7 +85,16 @@
                 <div>{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</div>
                 <div>{{ assignment.total_earnings }}</div>
                 <div>{{ assignment.goal }}</div>
-                <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>
+                <div class="report-snippet">
+                    {% if assignment.monthly_report %}
+                    <div class="report-toggle js-report-toggle" role="button" tabindex="0" aria-expanded="false" data-more-label="הצג עוד" data-less-label="הצג פחות">
+                        <div class="report-toggle-text">{{ assignment.monthly_report.content|linebreaksbr }}</div>
+                        <span class="report-toggle-label">הצג עוד</span>
+                    </div>
+                    {% else %}
+                    <span class="muted-inline">אין דוח לחודש זה</span>
+                    {% endif %}
+                </div>
             </a>
             {% empty %}
             <div class="dashboard-empty">אין נתונים לקטגוריה זו בחודש שנבחר.</div>
@@ -117,7 +127,16 @@
                 <div>{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</div>
                 <div>{{ assignment.total_earnings }}</div>
                 <div>{{ assignment.goal }}</div>
-                <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>
+                <div class="report-snippet">
+                    {% if assignment.monthly_report %}
+                    <div class="report-toggle js-report-toggle" role="button" tabindex="0" aria-expanded="false" data-more-label="הצג עוד" data-less-label="הצג פחות">
+                        <div class="report-toggle-text">{{ assignment.monthly_report.content|linebreaksbr }}</div>
+                        <span class="report-toggle-label">הצג עוד</span>
+                    </div>
+                    {% else %}
+                    <span class="muted-inline">אין דוח לחודש זה</span>
+                    {% endif %}
+                </div>
             </a>
             {% empty %}
             <div class="dashboard-empty">אין נתונים לקטגוריה זו בחודש שנבחר.</div>
@@ -150,7 +169,16 @@
                 <div>{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</div>
                 <div>{{ assignment.total_earnings }}</div>
                 <div>{{ assignment.goal }}</div>
-                <div class="report-snippet">{% if assignment.monthly_report %}{{ assignment.monthly_report.content|truncatechars:140 }}{% else %}<span class="muted-inline">אין דוח לחודש זה</span>{% endif %}</div>
+                <div class="report-snippet">
+                    {% if assignment.monthly_report %}
+                    <div class="report-toggle js-report-toggle" role="button" tabindex="0" aria-expanded="false" data-more-label="הצג עוד" data-less-label="הצג פחות">
+                        <div class="report-toggle-text">{{ assignment.monthly_report.content|linebreaksbr }}</div>
+                        <span class="report-toggle-label">הצג עוד</span>
+                    </div>
+                    {% else %}
+                    <span class="muted-inline">אין דוח לחודש זה</span>
+                    {% endif %}
+                </div>
             </a>
             {% empty %}
             <div class="dashboard-empty">אין נתונים לקטגוריה זו בחודש שנבחר.</div>
@@ -159,3 +187,6 @@
     </article>
 </section>
 {% endblock content %}
+{% block scripts %}
+<script src="{% static 'js/report-toggle.js' %}"></script>
+{% endblock scripts %}

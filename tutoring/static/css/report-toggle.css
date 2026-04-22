@@ -1,0 +1,55 @@
+.report-snippet {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.report-snippet--card {
+  margin: 0;
+}
+
+.report-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  cursor: pointer;
+}
+
+.report-toggle:focus-visible {
+  outline: 2px solid rgba(22, 50, 79, 0.35);
+  outline-offset: 4px;
+  border-radius: 0.75rem;
+}
+
+.report-toggle-text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.report-toggle.is-expanded .report-toggle-text {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+.report-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  color: var(--brand);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.report-toggle:not(.is-collapsible) {
+  cursor: default;
+}
+
+.report-toggle:not(.is-collapsible) .report-toggle-label {
+  display: none;
+}
