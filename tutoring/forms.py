@@ -238,39 +238,35 @@ class MonthPickerForm(forms.Form):
 class MonthlyReportForm(forms.ModelForm):
     class Meta:
         model = MonthlyReport
-        fields = ["month", "content"]
+        fields = ["report_date", "content"]
         labels = {
-            "month": "חודש הדוח",
-            "content": "דוח התקדמות",
+            "report_date": "תאריך העדכון",
+            "content": "עידכון התקדמות",
         }
         widgets = {
-            "month": forms.DateInput(
-                format="%Y-%m",
+            "report_date": forms.DateInput(
+                format="%d/%m/%Y",
                 attrs={
                     "lang": "he-IL",
-                    "class": "js-he-month",
+                    "class": "js-he-date",
                     "autocomplete": "off",
-                    "placeholder": "בחר חודש",
-                    "data-picker-type": "month",
+                    "placeholder": "יום/חודש/שנה",
+                    "data-picker-type": "date",
                 }
             ),
             "content": forms.Textarea(
                 attrs={
-                    "placeholder": "כתיבת סיכום ההתקדמות של החודש, נקודות לחיזוק ויעדים להמשך.",
+                    "placeholder": "כתיבת סיכום ההתקדמות, נקודות לחיזוק ויעדים להמשך.",
                 }
             ),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["month"].input_formats = ["%Y-%m", "%d/%m/%Y"]
-        self.fields["month"].error_messages["required"] = "נא לבחור חודש."
-        self.fields["month"].error_messages["invalid"] = "נא לבחור חודש תקין."
-        self.fields["content"].error_messages["required"] = "נא לכתוב דוח התקדמות."
-
-    def clean_month(self):
-        month = self.cleaned_data["month"]
-        return month.replace(day=1)
+        self.fields["report_date"].input_formats = ["%d/%m/%Y", "%Y-%m-%d"]
+        self.fields["report_date"].error_messages["required"] = "נא לבחור תאריך."
+        self.fields["report_date"].error_messages["invalid"] = "נא להזין תאריך בפורמט יום/חודש/שנה."
+        self.fields["content"].error_messages["required"] = "נא לכתוב עידכון התקדמות."
 
 
 class StudentForm(forms.ModelForm):
