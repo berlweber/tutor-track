@@ -310,31 +310,24 @@ class AttendanceAdjustment(models.Model):
 
 class MonthlyReport(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
-    month = models.DateField("חודש הדוח")
-    content = models.TextField("דוח התקדמות")
+    report_date = models.DateField("תאריך העדכון")
+    content = models.TextField("עידכון התקדמות")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        if self.month:
-            self.month = self.month.replace(day=1)
-        super().save(*args, **kwargs)
-
     def __str__(self):
-        return f"דוח {month_label(self.month)} עבור {self.assignment.student}"
+        return f"עידכון התקדמות מ-{self.report_date.strftime('%d/%m/%Y')} עבור {self.assignment.student}"
 
     def get_absolute_url(self):
         return reverse("assignment-detail", kwargs={"pk": self.assignment_id})
 
     @property
     def month_display(self):
-        return month_label(self.month)
+        return month_label(self.report_date.replace(day=1))
+
+    @property
+    def report_date_display(self):
+        return self.report_date.strftime("%d/%m/%Y")
 
     class Meta:
-        ordering = ["-month", "-updated_at"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["assignment", "month"],
-                name="unique_monthly_report_per_assignment",
-            )
-        ]
+        ordering = ["-report_date", "-created_at"]
