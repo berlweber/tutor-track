@@ -153,10 +153,11 @@ def get_visible_assignments(request):
 
 def build_assignment_month_sections(assignment):
     grouped_items = OrderedDict()
-    reports_by_month = {
-        report.month: report
-        for report in assignment.monthlyreport_set.all()
-    }
+    progress_updates_by_month = {}
+
+    for update in assignment.monthlyreport_set.all():
+        month_key = month_start(update.report_date)
+        progress_updates_by_month.setdefault(month_key, []).append(update)
 
     if assignment.is_monthly_billing:
         for adjustment in assignment.attendanceadjustment_set.all():
@@ -171,7 +172,7 @@ def build_assignment_month_sections(assignment):
                 grouped_items[month_key] = []
             grouped_items[month_key].append(session)
 
-    for report_month in reports_by_month:
+    for report_month in progress_updates_by_month:
         grouped_items.setdefault(report_month, [])
 
     month_sections = []
@@ -191,7 +192,7 @@ def build_assignment_month_sections(assignment):
                     "total_adjustments": total_adjustments,
                     "total_reduction": total_reduction,
                     "total_earnings": (assignment.monthly_rate or 0) - total_reduction,
-                    "report": reports_by_month.get(month_key),
+                    "progress_updates": progress_updates_by_month.get(month_key, []),
                 }
             )
         else:
@@ -215,24 +216,18 @@ def build_assignment_month_sections(assignment):
                     "total_sessions": total_sessions,
                     "equivalent_sessions": equivalent_sessions,
                     "equivalent_sessions_display": format_session_equivalent(equivalent_sessions),
-                    "report": reports_by_month.get(month_key),
+                    "progress_updates": progress_updates_by_month.get(month_key, []),
                 }
             )
 
     return month_sections
 
 
-def build_assignment_detail_context(assignment, *, session_form=None, adjustment_form=None):
+def build_assignment_detail_context(assignment):
     context = {
         "assignment": assignment,
         "month_sections": build_assignment_month_sections(assignment),
     }
-    if assignment.is_monthly_billing:
-        context["adjustment_form"] = adjustment_form or AttendanceAdjustmentForm()
-    else:
-        context["session_form"] = session_form or SessionForm(
-            initial={"duration": assignment.session_length}
-        )
     return context
 
 
@@ -331,9 +326,45 @@ class SessionUpdate(AssignmentOwnerMixin, UpdateView):
     form_class = SessionForm
     template_name = "tutoring/session_form.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["assignment"] = self.object.assignment
+        return context
+
     def get_success_url(self):
         month_str = self.object.date.strftime('%Y-%m')
         return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
+
+
+class SessionCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = Session
+    form_class = SessionForm
+    template_name = "tutoring/session_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.assignment = get_object_or_404(Assignment, pk=self.kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.assignment.tutor == self.request.user
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["duration"] = self.assignment.session_length
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["assignment"] = self.assignment
+        return context
+
+    def form_valid(self, form):
+        form.instance.assignment = self.assignment
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        month_str = self.object.date.strftime('%Y-%m')
+        return reverse("assignment-detail", kwargs={"pk": self.assignment.id}) + f"#month-{month_str}"
 
 
 class SessionDelete(AssignmentOwnerMixin, DeleteView):
@@ -345,10 +376,43 @@ class SessionDelete(AssignmentOwnerMixin, DeleteView):
         return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
 
 
+class AttendanceAdjustmentCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = AttendanceAdjustment
+    form_class = AttendanceAdjustmentForm
+    template_name = "tutoring/adjustment_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.assignment = get_object_or_404(Assignment, pk=self.kwargs["pk"])
+        if self.assignment.is_session_billing:
+            return redirect(reverse("assignment-detail", kwargs={"pk": self.assignment.id}))
+        return super().dispatch(request, *args, **kwargs)
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.assignment.tutor == self.request.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["assignment"] = self.assignment
+        return context
+
+    def form_valid(self, form):
+        form.instance.assignment = self.assignment
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        month_str = self.object.date.strftime('%Y-%m')
+        return reverse("assignment-detail", kwargs={"pk": self.assignment.id}) + f"#month-{month_str}"
+
+
 class AttendanceAdjustmentUpdate(AssignmentOwnerMixin, UpdateView):
     model = AttendanceAdjustment
     form_class = AttendanceAdjustmentForm
     template_name = "tutoring/adjustment_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["assignment"] = self.object.assignment
+        return context
 
     def get_success_url(self):
         month_str = self.object.date.strftime('%Y-%m')
@@ -383,27 +447,15 @@ class MonthlyReportCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        month_value = self.request.GET.get("month")
-        if month_value:
-            try:
-                initial["month"] = datetime.datetime.strptime(month_value, "%Y-%m").date()
-            except ValueError:
-                pass
+        initial["report_date"] = datetime.date.today()
         return initial
 
     def form_valid(self, form):
-        if MonthlyReport.objects.filter(
-            assignment=self.assignment,
-            month=form.cleaned_data["month"],
-        ).exists():
-            form.add_error("month", "כבר קיים דוח לחודש הזה עבור השיבוץ הזה.")
-            return self.form_invalid(form)
         form.instance.assignment = self.assignment
         return super().form_valid(form)
 
     def get_success_url(self):
-        # Get the month from the object after it's been saved
-        month_str = self.object.month.strftime('%Y-%m')
+        month_str = self.object.report_date.strftime('%Y-%m')
         return reverse("assignment-detail", kwargs={"pk": self.assignment.id}) + f"#month-{month_str}"
 
 
@@ -417,17 +469,8 @@ class MonthlyReportUpdate(AssignmentOwnerMixin, UpdateView):
         context["assignment"] = self.object.assignment
         return context
 
-    def form_valid(self, form):
-        if MonthlyReport.objects.filter(
-            assignment=self.object.assignment,
-            month=form.cleaned_data["month"],
-        ).exclude(pk=self.object.pk).exists():
-            form.add_error("month", "כבר קיים דוח לחודש הזה עבור השיבוץ הזה.")
-            return self.form_invalid(form)
-        return super().form_valid(form)
-
     def get_success_url(self):
-        month_str = self.object.month.strftime('%Y-%m')
+        month_str = self.object.report_date.strftime('%Y-%m')
         return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
 
 
@@ -436,7 +479,7 @@ class MonthlyReportDelete(AssignmentOwnerMixin, DeleteView):
     template_name = "tutoring/report_confirm_delete.html"
 
     def get_success_url(self):
-        month_str = self.object.month.strftime('%Y-%m')
+        month_str = self.object.report_date.strftime('%Y-%m')
         return reverse("assignment-detail", kwargs={"pk": self.object.assignment_id}) + f"#month-{month_str}"
 
 @must_be_yours
@@ -456,7 +499,7 @@ def add_session(request, pk):
     return render(
         request,
         "tutoring/assignment_detail.html",
-        build_assignment_detail_context(assignment, session_form=form),
+        build_assignment_detail_context(assignment),
         status=400,
     )
 
@@ -482,14 +525,15 @@ def calculate_totals(assignment, month, year):
     if month == 'all':
         sessions = Session.objects.filter(assignment__id=assignment.id)
         adjustments = AttendanceAdjustment.objects.filter(assignment__id=assignment.id)
-        report = None
+        progress_updates = []
     else:
         sessions = Session.objects.filter(assignment__id=assignment.id).filter(date__month=month).filter(date__year=year)
         adjustments = AttendanceAdjustment.objects.filter(assignment__id=assignment.id).filter(date__month=month).filter(date__year=year)
-        report = MonthlyReport.objects.filter(
+        progress_updates = list(MonthlyReport.objects.filter(
             assignment_id=assignment.id,
-            month=datetime.date(year, month, 1),
-        ).first()
+            report_date__year=year,
+            report_date__month=month,
+        ))
 
     total_sessions = sessions.count()
     total_adjustments = adjustments.count()
@@ -517,7 +561,13 @@ def calculate_totals(assignment, month, year):
     assignment.total_sessions = total_sessions
     assignment.total_adjustments = total_adjustments
     assignment.total_earnings = total_earnings
-    assignment.monthly_report = report
+    assignment.progress_updates = progress_updates
+    assignment.latest_progress_update = progress_updates[0] if progress_updates else None
+    assignment.progress_update_count = len(progress_updates)
+    assignment.earlier_progress_update_count = max(len(progress_updates) - 1, 0)
+    assignment.progress_updates_month_url = (
+        reverse("assignment-detail", kwargs={"pk": assignment.id}) + f"#updates-{year}-{str(month).zfill(2)}"
+    )
 
     return assignment
 
