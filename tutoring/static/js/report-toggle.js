@@ -22,6 +22,41 @@ document.addEventListener("DOMContentLoaded", () => {
     // caches the reports actual text in order to exit if there is no text
     const text = toggle.querySelector(".report-toggle-text");
     if (!text) return;
+    const updateCell = toggle.closest(".dashboard-update-cell[data-update-url]");
+
+    const syncCellLinkState = (isLinkable) => {
+      if (!updateCell) return;
+
+      updateCell.classList.toggle("is-cell-link", isLinkable);
+      if (isLinkable) {
+        updateCell.setAttribute("role", "link");
+        updateCell.setAttribute("tabindex", "0");
+      } else {
+        updateCell.removeAttribute("role");
+        updateCell.removeAttribute("tabindex");
+      }
+    };
+
+    if (updateCell && !updateCell.dataset.linkHandlerBound) {
+      updateCell.dataset.linkHandlerBound = "true";
+
+      const shouldIgnoreCellLink = (event) =>
+        event.target.closest("a, button") || event.target.closest(".js-report-toggle.is-collapsible");
+
+      updateCell.addEventListener("click", (event) => {
+        if (!updateCell.classList.contains("is-cell-link") || shouldIgnoreCellLink(event)) return;
+        window.location.href = updateCell.dataset.updateUrl;
+      });
+
+      updateCell.addEventListener("keydown", (event) => {
+        if (!updateCell.classList.contains("is-cell-link")) return;
+        if (event.key !== "Enter" && event.key !== " ") return;
+        if (shouldIgnoreCellLink(event)) return;
+
+        event.preventDefault();
+        window.location.href = updateCell.dataset.updateUrl;
+      });
+    }
 
     const syncCollapsibleState = () => {
       const wasExpanded = toggle.classList.contains("is-expanded");
@@ -33,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // adding a is-collapsible class to toggle element only if its collapsible
       const isCollapsible = text.scrollHeight > text.clientHeight + 1;
       toggle.classList.toggle("is-collapsible", isCollapsible);
+      syncCellLinkState(!isCollapsible);
 
       // returns the expanded class if it was present before
       if (wasExpanded) {
@@ -41,11 +77,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (isCollapsible) {
         // sets it to be tab-focusable and set to the previous expanded-state
+        toggle.setAttribute("role", "button");
         toggle.setAttribute("tabindex", "0");
         setExpandedState(toggle, wasExpanded);
       } else {
         toggle.classList.remove("is-expanded");
         toggle.setAttribute("aria-expanded", "false");
+        toggle.removeAttribute("role");
         toggle.removeAttribute("tabindex");
       }
     };

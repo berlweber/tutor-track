@@ -8,7 +8,7 @@
     <div>
         <p class="eyebrow">לוח סיכום</p>
         <h1>סיכום חודשי</h1>
-        <p class="dashboard-subtitle">נתוני השיעורים והתשלומים עבור {{ month }} {{ year }}</p>
+        <p class="dashboard-subtitle">נתוני השיעורים, התשלומים ועידכוני ההתקדמות עבור {{ month }} {{ year }}</p>
     </div>
 
     <div class="dashboard-filter">
@@ -75,27 +75,40 @@
                 <div>נתוני חיוב</div>
                 <div>סכום</div>
                 <div>יעד הלימוד</div>
-                <div>דוח חודשי</div>
+                <div>עידכון התקדמות</div>
             </div>
             {% for assignment in school_assignments %}
-            <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-row">
-                <div>{{ assignment.student }}</div>
-                <div>{{ assignment.tutor_display_name }}</div>
-                <div>{{ assignment.get_billing_mode_display }}</div>
-                <div>{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</div>
-                <div>{{ assignment.total_earnings }}</div>
-                <div>{{ assignment.goal }}</div>
-                <div class="report-snippet">
-                    {% if assignment.monthly_report %}
+            <div class="dashboard-row">
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.student }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.tutor_display_name }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.get_billing_mode_display }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.total_earnings }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.goal }}</a>
+                <div class="report-snippet dashboard-update-cell" data-update-url="{{ assignment.progress_updates_month_url }}">
+                    {% if assignment.latest_progress_update %}
                     <div class="report-toggle js-report-toggle" role="button" tabindex="0" aria-expanded="false" data-more-label="הצג עוד" data-less-label="הצג פחות">
-                        <div class="report-toggle-text">{{ assignment.monthly_report.content|linebreaksbr }}</div>
+                        <div class="dashboard-update-meta">
+                            <span class="dashboard-update-label">העידכון האחרון</span>
+                            <strong>{{ assignment.latest_progress_update.report_date|date:"d/m/Y" }}</strong>
+                        </div>
+                        <div class="report-toggle-text">{{ assignment.latest_progress_update.content|linebreaksbr }}</div>
                         <span class="report-toggle-label">הצג עוד</span>
                     </div>
+                    {% if assignment.earlier_progress_update_count %}
+                    <a href="{{ assignment.progress_updates_month_url }}" class="dashboard-earlier-updates-link">
+                        {% if assignment.earlier_progress_update_count == 1 %}
+                        יש עוד עידכון קודם לחודש הזה
+                        {% else %}
+                        יש עוד {{ assignment.earlier_progress_update_count }} עידכונים קודמים לחודש הזה
+                        {% endif %}
+                    </a>
+                    {% endif %}
                     {% else %}
-                    <span class="muted-inline">אין דוח לחודש זה</span>
+                    <span class="muted-inline">אין עידכון לחודש זה</span>
                     {% endif %}
                 </div>
-            </a>
+            </div>
             {% empty %}
             <div class="dashboard-empty">אין נתונים לקטגוריה זו בחודש שנבחר.</div>
             {% endfor %}
@@ -117,27 +130,40 @@
                 <div>נתוני חיוב</div>
                 <div>סכום</div>
                 <div>יעד הלימוד</div>
-                <div>דוח חודשי</div>
+                <div>עידכון התקדמות</div>
             </div>
             {% for assignment in parents_assignments %}
-            <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-row">
-                <div>{{ assignment.student }}</div>
-                <div>{{ assignment.tutor_display_name }}</div>
-                <div>{{ assignment.get_billing_mode_display }}</div>
-                <div>{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</div>
-                <div>{{ assignment.total_earnings }}</div>
-                <div>{{ assignment.goal }}</div>
-                <div class="report-snippet">
-                    {% if assignment.monthly_report %}
+            <div class="dashboard-row">
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.student }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.tutor_display_name }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.get_billing_mode_display }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.total_earnings }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.goal }}</a>
+                <div class="report-snippet dashboard-update-cell" data-update-url="{{ assignment.progress_updates_month_url }}">
+                    {% if assignment.latest_progress_update %}
                     <div class="report-toggle js-report-toggle" role="button" tabindex="0" aria-expanded="false" data-more-label="הצג עוד" data-less-label="הצג פחות">
-                        <div class="report-toggle-text">{{ assignment.monthly_report.content|linebreaksbr }}</div>
+                        <div class="dashboard-update-meta">
+                            <span class="dashboard-update-label">העידכון האחרון</span>
+                            <strong>{{ assignment.latest_progress_update.report_date|date:"d/m/Y" }}</strong>
+                        </div>
+                        <div class="report-toggle-text">{{ assignment.latest_progress_update.content|linebreaksbr }}</div>
                         <span class="report-toggle-label">הצג עוד</span>
                     </div>
+                    {% if assignment.earlier_progress_update_count %}
+                    <a href="{{ assignment.progress_updates_month_url }}" class="dashboard-earlier-updates-link">
+                        {% if assignment.earlier_progress_update_count == 1 %}
+                        יש עוד עידכון קודם לחודש הזה
+                        {% else %}
+                        יש עוד {{ assignment.earlier_progress_update_count }} עידכונים קודמים לחודש הזה
+                        {% endif %}
+                    </a>
+                    {% endif %}
                     {% else %}
-                    <span class="muted-inline">אין דוח לחודש זה</span>
+                    <span class="muted-inline">אין עידכון לחודש זה</span>
                     {% endif %}
                 </div>
-            </a>
+            </div>
             {% empty %}
             <div class="dashboard-empty">אין נתונים לקטגוריה זו בחודש שנבחר.</div>
             {% endfor %}
@@ -159,27 +185,40 @@
                 <div>נתוני חיוב</div>
                 <div>סכום</div>
                 <div>יעד הלימוד</div>
-                <div>דוח חודשי</div>
+                <div>עידכון התקדמות</div>
             </div>
             {% for assignment in fund_assignments %}
-            <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-row">
-                <div>{{ assignment.student }}</div>
-                <div>{{ assignment.tutor_display_name }}</div>
-                <div>{{ assignment.get_billing_mode_display }}</div>
-                <div>{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</div>
-                <div>{{ assignment.total_earnings }}</div>
-                <div>{{ assignment.goal }}</div>
-                <div class="report-snippet">
-                    {% if assignment.monthly_report %}
+            <div class="dashboard-row">
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.student }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.tutor_display_name }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.get_billing_mode_display }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.activity_count_display|default:assignment.activity_count }} {{ assignment.activity_label }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.total_earnings }}</a>
+                <a href="{% url "assignment-detail" assignment.id %}" class="dashboard-cell-link">{{ assignment.goal }}</a>
+                <div class="report-snippet dashboard-update-cell" data-update-url="{{ assignment.progress_updates_month_url }}">
+                    {% if assignment.latest_progress_update %}
                     <div class="report-toggle js-report-toggle" role="button" tabindex="0" aria-expanded="false" data-more-label="הצג עוד" data-less-label="הצג פחות">
-                        <div class="report-toggle-text">{{ assignment.monthly_report.content|linebreaksbr }}</div>
+                        <div class="dashboard-update-meta">
+                            <span class="dashboard-update-label">העידכון האחרון</span>
+                            <strong>{{ assignment.latest_progress_update.report_date|date:"d/m/Y" }}</strong>
+                        </div>
+                        <div class="report-toggle-text">{{ assignment.latest_progress_update.content|linebreaksbr }}</div>
                         <span class="report-toggle-label">הצג עוד</span>
                     </div>
+                    {% if assignment.earlier_progress_update_count %}
+                    <a href="{{ assignment.progress_updates_month_url }}" class="dashboard-earlier-updates-link">
+                        {% if assignment.earlier_progress_update_count == 1 %}
+                        יש עוד עידכון קודם לחודש הזה
+                        {% else %}
+                        יש עוד {{ assignment.earlier_progress_update_count }} עידכונים קודמים לחודש הזה
+                        {% endif %}
+                    </a>
+                    {% endif %}
                     {% else %}
-                    <span class="muted-inline">אין דוח לחודש זה</span>
+                    <span class="muted-inline">אין עידכון לחודש זה</span>
                     {% endif %}
                 </div>
-            </a>
+            </div>
             {% empty %}
             <div class="dashboard-empty">אין נתונים לקטגוריה זו בחודש שנבחר.</div>
         {% endfor %}

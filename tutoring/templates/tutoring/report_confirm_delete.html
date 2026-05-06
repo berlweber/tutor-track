@@ -5,11 +5,11 @@
 {% block content %}
 <div class="page-header">
   <div>
-    <p class="eyebrow">מחיקת דוח</p>
-    <h1>מחיקת דוח חודשי</h1>
+    <p class="eyebrow">מחיקת עידכון</p>
+    <h1>מחיקת עידכון התקדמות</h1>
   </div>
 </div>
-<h2 class='confirm-text'>האם למחוק את הדוח של <strong>{{ object.month_display }}</strong>?</h2>
+<h2 class='confirm-text'>האם למחוק את העידכון מתאריך <strong>{{ object.report_date|date:"d/m/Y" }}</strong>?</h2>
 
 <form action="" method="post" class="form">
   {% csrf_token %}

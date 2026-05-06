@@ -5,8 +5,13 @@
 {% block content %}
 <div class='page-header'>
     <div>
+        {% if object %}
         <p class="eyebrow">עריכת שיעור</p>
         <h1>עדכון שיעור</h1>
+        {% else %}
+        <p class="eyebrow">הוספת שיעור</p>
+        <h1>הוספת שיעור עבור '{{ assignment.student }}'</h1>
+        {% endif %}
     </div>
 </div>
 
@@ -14,8 +19,8 @@
     {% csrf_token %}
     {{ form.as_p }}
     <div class="form-actions">
-        <button type="submit" class='btn'>שמירת שינויים</button>
-        <a href="{% url 'assignment-detail' object.assignment.id %}" class="btn secondary">ביטול</a>
+        <button type="submit" class='btn'>{% if object %}שמירת שינויים{% else %}שמירת שיעור{% endif %}</button>
+        <a href="{% url 'assignment-detail' assignment.id %}" class="btn secondary">ביטול</a>
     </div>
 </form>
 {% endblock content %}

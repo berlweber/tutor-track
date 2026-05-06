@@ -5,8 +5,13 @@
 {% block content %}
 <div class='page-header'>
     <div>
+        {% if object %}
         <p class="eyebrow">עריכת דיווח</p>
         <h1>עדכון איחור או חיסור</h1>
+        {% else %}
+        <p class="eyebrow">הוספת דיווח</p>
+        <h1>הוספת איחור או חיסור עבור '{{ assignment.student }}'</h1>
+        {% endif %}
     </div>
 </div>
 
@@ -17,8 +22,8 @@
     <p>{{ form.adjustment_type.label_tag }} {{ form.adjustment_type }} {{ form.adjustment_type.errors }}</p>
     <p id="late-duration-field">{{ form.duration.label_tag }} {{ form.duration }} {{ form.duration.errors }}</p>
     <div class="form-actions">
-        <button type="submit" class='btn'>שמירת שינויים</button>
-        <a href="{% url 'assignment-detail' object.assignment.id %}" class="btn secondary">ביטול</a>
+        <button type="submit" class='btn'>{% if object %}שמירת שינויים{% else %}שמירת דיווח{% endif %}</button>
+        <a href="{% url 'assignment-detail' assignment.id %}" class="btn secondary">ביטול</a>
     </div>
 </form>
 <script>

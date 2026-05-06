@@ -4,8 +4,14 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 
-from .forms import AssignmentForm, AttendanceAdjustmentForm, SessionForm, StudentForm
-from .models import Assignment, AttendanceAdjustment, Session, Student
+from .forms import (
+    AssignmentForm,
+    AttendanceAdjustmentForm,
+    MonthlyReportForm,
+    SessionForm,
+    StudentForm,
+)
+from .models import Assignment, AttendanceAdjustment, MonthlyReport, Session, Student
 from .views import (
     SORT_BY_STUDENT,
     SORT_BY_TUTOR,
@@ -226,12 +232,12 @@ class BillingModeTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("duration", form.errors)
 
-    def test_add_session_missing_date_rerenders_assignment_with_error(self):
+    def test_session_create_missing_date_rerenders_form_with_error(self):
         assignment = self.create_assignment()
         self.client.force_login(self.tutor)
 
         response = self.client.post(
-            f"/assignment/{assignment.id}/add-session/",
+            f"/assignment/{assignment.id}/sessions/create/",
             data={
                 "date": "",
                 "duration": "01:00",
@@ -239,9 +245,71 @@ class BillingModeTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 400)
-        self.assertContains(response, "נא לבחור תאריך.", status_code=400)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "נא לבחור תאריך.", status_code=200)
         self.assertEqual(Session.objects.filter(assignment=assignment).count(), 0)
+
+    def test_session_billing_detail_shows_monthly_header_actions_once(self):
+        assignment = self.create_assignment()
+        Session.objects.create(
+            assignment=assignment,
+            date=datetime.date(2026, 4, 10),
+            duration=datetime.timedelta(hours=1),
+        )
+        self.client.force_login(self.tutor)
+
+        response = self.client.get(f"/assignments/{assignment.id}/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "הוסף שיעור", count=1)
+        self.assertContains(response, "הוסף עידכון התקדמות", count=1)
+
+    def test_monthly_billing_detail_uses_header_actions_without_inline_adjustment_form(self):
+        assignment = self.create_assignment(
+            billing_mode=Assignment.BILLING_PER_MONTH,
+            monthly_rate=Decimal("1290.00"),
+            sessions_per_week=3,
+            session_rate=Decimal("0.00"),
+        )
+        AttendanceAdjustment.objects.create(
+            assignment=assignment,
+            date=datetime.date(2026, 4, 10),
+            adjustment_type=AttendanceAdjustment.TYPE_ABSENT,
+        )
+        self.client.force_login(self.tutor)
+
+        response = self.client.get(f"/assignments/{assignment.id}/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "הוסף דיווח איחור/חיסור", count=1)
+        self.assertContains(response, "הוסף עידכון התקדמות", count=1)
+        self.assertNotContains(response, "adjustment-form")
+        self.assertNotContains(response, "add-adjustment")
+
+    def test_adjustment_create_page_saves_and_redirects_to_month(self):
+        assignment = self.create_assignment(
+            billing_mode=Assignment.BILLING_PER_MONTH,
+            monthly_rate=Decimal("1290.00"),
+            sessions_per_week=3,
+            session_rate=Decimal("0.00"),
+        )
+        self.client.force_login(self.tutor)
+
+        response = self.client.post(
+            f"/assignment/{assignment.id}/adjustments/create/",
+            data={
+                "date": "10/04/2026",
+                "adjustment_type": AttendanceAdjustment.TYPE_LATE,
+                "duration": "00:15",
+            },
+        )
+
+        self.assertRedirects(
+            response,
+            f"/assignments/{assignment.id}/#month-2026-04",
+            fetch_redirect_response=False,
+        )
+        self.assertEqual(AttendanceAdjustment.objects.filter(assignment=assignment).count(), 1)
 
     def test_dashboard_initial_month_picker_renders_without_day(self):
         self.create_assignment()
@@ -252,3 +320,177 @@ class BillingModeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         today = datetime.date.today().replace(day=1)
         self.assertContains(response, f'value="{today.strftime("%Y-%m")}"')
+
+    def test_progress_update_form_uses_full_date_field(self):
+        form = MonthlyReportForm()
+
+        self.assertIn("report_date", form.fields)
+        self.assertNotIn("day", form.fields)
+
+    def test_assignment_can_store_multiple_progress_updates_in_same_month(self):
+        assignment = self.create_assignment()
+
+        MonthlyReport.objects.create(
+            assignment=assignment,
+            report_date=datetime.date(2026, 4, 5),
+            content="עידכון ראשון",
+        )
+        MonthlyReport.objects.create(
+            assignment=assignment,
+            report_date=datetime.date(2026, 4, 18),
+            content="עידכון שני",
+        )
+
+        self.assertEqual(MonthlyReport.objects.filter(assignment=assignment).count(), 2)
+
+    def test_dashboard_uses_latest_progress_update_and_count_for_selected_month(self):
+        assignment = self.create_assignment()
+        MonthlyReport.objects.create(
+            assignment=assignment,
+            report_date=datetime.date(2026, 4, 5),
+            content="עידכון ראשון",
+        )
+        latest_update = MonthlyReport.objects.create(
+            assignment=assignment,
+            report_date=datetime.date(2026, 4, 18),
+            content="עידכון שני",
+        )
+
+        assignment = calculate_totals(assignment, 4, 2026)
+
+        self.assertEqual(assignment.progress_update_count, 2)
+        self.assertEqual(assignment.earlier_progress_update_count, 1)
+        self.assertEqual(assignment.latest_progress_update.id, latest_update.id)
+        self.assertEqual(
+            assignment.progress_updates_month_url,
+            f"/assignments/{assignment.id}/#updates-2026-04",
+        )
+
+    def test_dashboard_links_earlier_progress_updates_to_assignment_month(self):
+        assignment = self.create_assignment()
+        MonthlyReport.objects.create(
+            assignment=assignment,
+            report_date=datetime.date(2026, 4, 5),
+            content="עידכון ראשון",
+        )
+        MonthlyReport.objects.create(
+            assignment=assignment,
+            report_date=datetime.date(2026, 4, 18),
+            content="עידכון שני",
+        )
+        self.client.force_login(self.tutor)
+
+        response = self.client.get("/assignments/dashboard/?month=2026-04")
+
+        self.assertContains(response, "העידכון האחרון")
+        self.assertContains(response, "עידכון שני")
+        self.assertContains(response, "יש עוד עידכון קודם לחודש הזה")
+        self.assertContains(response, f'href="/assignments/{assignment.id}/#updates-2026-04"')
+        self.assertContains(response, f'data-update-url="/assignments/{assignment.id}/#updates-2026-04"')
+
+    def test_create_progress_update_saves_full_selected_date(self):
+        assignment = self.create_assignment()
+        self.client.force_login(self.tutor)
+
+        response = self.client.post(
+            f"/assignment/{assignment.id}/reports/create/",
+            data={
+                "report_date": "15/04/2026",
+                "content": "עידכון לאמצע החודש",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        update = MonthlyReport.objects.get(assignment=assignment)
+        self.assertEqual(update.report_date, datetime.date(2026, 4, 15))
+
+    def test_edit_progress_update_allows_full_date_change(self):
+        assignment = self.create_assignment()
+        update = MonthlyReport.objects.create(
+            assignment=assignment,
+            report_date=datetime.date(2026, 4, 15),
+            content="עידכון מקורי",
+        )
+        self.client.force_login(self.tutor)
+
+        response = self.client.post(
+            f"/reports/{update.id}/update/",
+            data={
+                "report_date": "03/05/2026",
+                "content": "עידכון מעודכן",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        update.refresh_from_db()
+        self.assertEqual(update.report_date, datetime.date(2026, 5, 3))
+
+    def test_assignment_detail_groups_progress_updates_by_month(self):
+        assignment = self.create_assignment()
+        MonthlyReport.objects.create(
+            assignment=assignment,
+            report_date=datetime.date(2026, 4, 5),
+            content="עידכון ראשון",
+        )
+        MonthlyReport.objects.create(
+            assignment=assignment,
+            report_date=datetime.date(2026, 4, 18),
+            content="עידכון שני",
+        )
+        self.client.force_login(self.tutor)
+
+        response = self.client.get(f"/assignments/{assignment.id}/")
+
+        self.assertContains(response, "2 עידכונים בחודש זה")
+        self.assertContains(response, "05/04/2026")
+        self.assertContains(response, "18/04/2026")
+        self.assertContains(response, 'href="#activity-2026-04"')
+        self.assertContains(response, 'href="#updates-2026-04"')
+
+    def test_assignment_detail_shows_top_level_progress_update_button(self):
+        assignment = self.create_assignment()
+        self.client.force_login(self.tutor)
+
+        response = self.client.get(f"/assignments/{assignment.id}/")
+
+        self.assertContains(response, "הוסף עידכון התקדמות")
+        self.assertContains(response, "הוסף שיעור")
+
+    def test_assignment_detail_uses_singular_update_label_for_single_update(self):
+        assignment = self.create_assignment()
+        MonthlyReport.objects.create(
+            assignment=assignment,
+            report_date=datetime.date(2026, 4, 5),
+            content="עידכון יחיד",
+        )
+        self.client.force_login(self.tutor)
+
+        response = self.client.get(f"/assignments/{assignment.id}/")
+
+        self.assertContains(response, "עידכון אחד בחודש זה")
+
+    def test_session_create_page_renders_for_assignment(self):
+        assignment = self.create_assignment()
+        self.client.force_login(self.tutor)
+
+        response = self.client.get(f"/assignment/{assignment.id}/sessions/create/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "הוספת שיעור עבור")
+
+    def test_session_create_saves_and_redirects_to_assignment_month(self):
+        assignment = self.create_assignment()
+        self.client.force_login(self.tutor)
+
+        response = self.client.post(
+            f"/assignment/{assignment.id}/sessions/create/",
+            data={
+                "date": "10/04/2026",
+                "duration": "01:00",
+                "note": "חזרה",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Session.objects.filter(assignment=assignment).count(), 1)
+        self.assertIn("#month-2026-04", response.url)

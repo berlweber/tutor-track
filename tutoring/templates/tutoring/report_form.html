@@ -5,20 +5,29 @@
 {% block content %}
 <div class='page-header'>
     <div>
-        <p class="eyebrow">דוח חודשי</p>
+        <p class="eyebrow">עידכון התקדמות</p>
         {% if object %}
-        <h1>עריכת דוח עבור '{{ assignment.student }}'</h1>
+        <h1>עריכת עידכון עבור '{{ assignment.student }}'</h1>
         {% else %}
-        <h1>יצירת דוח עבור '{{ assignment.student }}'</h1>
+        <h1>יצירת עידכון עבור '{{ assignment.student }}'</h1>
         {% endif %}
     </div>
 </div>
 
 <form action="" method="post" class="form-container">
     {% csrf_token %}
-    {{ form.as_p }}
+    <p>
+        {{ form.report_date.label_tag }}
+        {{ form.report_date }}
+        {{ form.report_date.errors }}
+    </p>
+    <p>
+        {{ form.content.label_tag }}
+        {{ form.content }}
+        {{ form.content.errors }}
+    </p>
     <div class="form-actions">
-        <button type="submit" class='btn'>{% if object %}שמירת שינויים{% else %}שמירת דוח{% endif %}</button>
+        <button type="submit" class='btn'>{% if object %}שמירת שינויים{% else %}שמירת עידכון{% endif %}</button>
         <a href="{% url 'assignment-detail' assignment.id %}" class="btn secondary">ביטול</a>
     </div>
 </form>

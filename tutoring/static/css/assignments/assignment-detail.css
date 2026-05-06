@@ -2,12 +2,179 @@
   margin-bottom: 1.25rem;
 }
 
+.assignment-detail-layout {
+  display: grid;
+  grid-template-columns: 10.75rem minmax(0, 1fr);
+  gap: 1.2rem;
+  align-items: start;
+  direction: ltr;
+}
+
+.assignment-detail-main {
+  min-width: 0;
+  direction: rtl;
+}
+
+.assignment-page-nav {
+  position: sticky;
+  top: 6.6rem;
+  z-index: 20;
+  width: 10.75rem;
+  direction: rtl;
+}
+
+.assignment-page-nav-inner {
+  width: 10.75rem;
+  padding: 1rem;
+  border: 1px solid rgba(24, 48, 71, 0.1);
+  border-radius: 1.25rem;
+  background: rgba(255, 253, 249, 0.86);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  transition: width 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.assignment-page-nav:hover .assignment-page-nav-inner,
+.assignment-page-nav:focus-within .assignment-page-nav-inner {
+  width: 15.5rem;
+  background: rgba(255, 253, 249, 0.95);
+  box-shadow: var(--shadow-strong);
+}
+
+.assignment-page-nav-title,
+.assignment-page-nav-group-title {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.assignment-page-nav-title {
+  white-space: nowrap;
+  margin-bottom: 0.55rem;
+}
+
+.assignment-page-nav-group {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(24, 48, 71, 0.09);
+}
+
+.assignment-page-nav-group-title {
+  margin-bottom: 0.45rem;
+}
+
+.assignment-page-nav-link {
+  position: relative;
+  display: block;
+  margin-top: 0.25rem;
+  padding: 0.58rem 0.75rem;
+  border-radius: 0.75rem;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.assignment-page-nav-link:hover {
+  background: rgba(22, 50, 79, 0.07);
+  transform: translateX(2px);
+}
+
+.assignment-page-nav-link.is-active {
+  color: var(--brand);
+  background: rgba(22, 50, 79, 0.1);
+}
+
+.assignment-page-nav-month:has(.assignment-page-nav-sublink.is-active) > .assignment-page-nav-link--month {
+  color: var(--brand);
+  background: rgba(22, 50, 79, 0.07);
+}
+
+.assignment-page-nav-link.is-active::before {
+  position: absolute;
+  top: 0.55rem;
+  right: 0;
+  bottom: 0.55rem;
+  width: 0.22rem;
+  border-radius: 999px;
+  background: var(--accent);
+  content: "";
+}
+
+.assignment-page-nav-link--month {
+  padding-top: 0.54rem;
+  padding-bottom: 0.54rem;
+}
+
+.assignment-page-nav-link--month small {
+  display: none;
+  margin-top: 0.16rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.assignment-page-nav:hover .assignment-page-nav-link--month small,
+.assignment-page-nav:focus-within .assignment-page-nav-link--month small {
+  display: block;
+}
+
+.assignment-page-nav-link--month.is-active small {
+  color: var(--brand-soft);
+}
+
+.assignment-page-nav-sublist {
+  margin: 0.12rem 0.5rem 0.55rem 0;
+  padding-right: 0.6rem;
+  border-right: 1px solid rgba(24, 48, 71, 0.12);
+}
+
+.assignment-page-nav-sublink {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0.12rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.55rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.assignment-page-nav-sublink:hover {
+  color: var(--brand-soft);
+  background: rgba(22, 50, 79, 0.06);
+  transform: translateX(2px);
+}
+
+.assignment-page-nav-sublink.is-active {
+  color: var(--brand);
+  background: rgba(200, 139, 74, 0.14);
+}
+
 .assignment-container {
   background: linear-gradient(180deg, rgba(255, 253, 249, 0.97), rgba(251, 247, 241, 0.97));
   border: 1px solid var(--line);
   border-radius: 1.6rem;
   padding: 1.5rem;
   box-shadow: var(--shadow-soft);
+}
+
+.assignment-container,
+.sessions,
+.month-block,
+.month-activity-section,
+.progress-updates-stack {
+  scroll-margin-top: 7rem;
 }
 
 .assignment-summary {
@@ -50,8 +217,16 @@
   white-space: pre-line;
 }
 
-.assignment-actions {
+.assignment-actions-bar {
   margin-top: 1.25rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.assignment-actions {
   display: flex;
   gap: 0.8rem;
   flex-wrap: wrap;
@@ -69,6 +244,26 @@
 
 .subsection-title p {
   color: var(--muted);
+}
+
+.subsection-title--with-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.subsection-title--with-actions h2 {
+  margin-top: 0;
+}
+
+.subsection-title--with-actions p {
+  margin-bottom: 0;
+}
+
+.subsection-title--with-actions .assignment-actions {
+  justify-content: flex-end;
 }
 
 .subsection-content {
@@ -90,7 +285,7 @@
 }
 
 .table-shell {
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: var(--shadow-soft);
 }
 
@@ -98,6 +293,49 @@
   display: flex;
   gap: 0.55rem;
   flex-wrap: wrap;
+}
+
+.inline-actions--table {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.table-actions-heading,
+.table-actions-cell {
+  text-align: left;
+}
+
+.sessions-table {
+  table-layout: fixed;
+  min-width: 48rem;
+}
+
+.sessions-table th:first-child,
+.sessions-table td:first-child,
+.sessions-table th:nth-child(4),
+.sessions-table td:nth-child(4) {
+  width: 8.5rem;
+  white-space: nowrap;
+}
+
+.sessions-table th:nth-child(2),
+.sessions-table td:nth-child(2) {
+  width: 6rem;
+  white-space: nowrap;
+}
+
+.sessions-table .table-actions-heading,
+.sessions-table .table-actions-cell {
+  width: 12.5rem;
+}
+
+.sessions-table .inline-actions--table {
+  flex-wrap: nowrap;
+}
+
+.session-note-cell {
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .table-action {
@@ -120,12 +358,14 @@
 }
 
 .danger-link {
-  color: var(--danger);
-  background: rgba(185, 75, 75, 0.1);
+  color: var(--danger-dark);
+  background: rgba(185, 75, 75, 0.035);
 }
 
-.danger-link:hover {
-  background: rgba(185, 75, 75, 0.18);
+.danger-link:hover,
+.danger-link:focus-visible {
+  color: var(--danger);
+  background: rgba(185, 75, 75, 0.13);
 }
 
 .empty-cell {
@@ -139,13 +379,128 @@
 
 .month-block {
   margin-bottom: 1.4rem;
+  padding: 1.2rem;
+  border: 1px solid rgba(24, 48, 71, 0.12);
+  border-radius: 1.45rem;
+  background:
+    linear-gradient(270deg, rgba(200, 139, 74, 0.18), transparent 0.55rem),
+    linear-gradient(180deg, rgba(255, 253, 249, 0.94), rgba(248, 243, 235, 0.94));
+  box-shadow: var(--shadow-soft);
 }
 
 .month-block-header {
   display: flex;
   justify-content: space-between;
   align-items: end;
-  margin-bottom: 0.9rem;
+  gap: 1rem;
+  margin: -1.2rem -1.2rem 1.1rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid rgba(24, 48, 71, 0.1);
+  border-radius: 1.45rem 1.45rem 0 0;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.month-block-header h3 {
+  margin-bottom: 0;
+}
+
+.month-subsection-title {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.progress-updates-stack {
+  margin-top: 1.1rem;
+  padding: 1rem;
+  border: 1px dashed rgba(200, 139, 74, 0.34);
+  border-right: 0.35rem solid rgba(200, 139, 74, 0.52);
+  border-radius: 1.1rem;
+  background: rgba(255, 249, 239, 0.66);
+  display: grid;
+  gap: 0.85rem;
+}
+
+.progress-updates-stack--empty {
+  gap: 0.65rem;
+}
+
+.progress-updates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-updates-table-shell {
+  border-color: rgba(200, 139, 74, 0.2);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: none;
+}
+
+.progress-updates-table {
+  table-layout: fixed;
+  min-width: 48rem;
+}
+
+.progress-updates-table thead {
+  background: rgba(200, 139, 74, 0.1);
+}
+
+.progress-updates-table th {
+  color: var(--brand-soft);
+}
+
+.progress-updates-table tbody tr {
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.progress-updates-table tbody tr:hover {
+  background: rgba(200, 139, 74, 0.06);
+}
+
+.progress-updates-table th:first-child,
+.progress-updates-table td:first-child,
+.progress-updates-table th:nth-child(3),
+.progress-updates-table td:nth-child(3) {
+  width: 8.5rem;
+  white-space: nowrap;
+}
+
+.progress-updates-table .table-actions-heading,
+.progress-updates-table .table-actions-cell {
+  width: 12.5rem;
+}
+
+.progress-updates-table .inline-actions--table {
+  flex-wrap: nowrap;
+}
+
+.progress-updates-table .table-action {
+  min-height: 2rem;
+  padding: 0.35rem 0.72rem;
+  background: rgba(200, 139, 74, 0.12);
+}
+
+.progress-updates-table .table-action:hover {
+  background: rgba(200, 139, 74, 0.2);
+}
+
+.progress-updates-table .danger-link {
+  background: rgba(185, 75, 75, 0.035);
+}
+
+.progress-updates-table .danger-link:hover,
+.progress-updates-table .danger-link:focus-visible {
+  background: rgba(185, 75, 75, 0.13);
+}
+
+.progress-update-content-cell {
+  color: var(--text);
+}
+
+.report-snippet--table {
+  line-height: 1.55;
 }
 
 .report-card {
@@ -182,18 +537,18 @@
 }
 
 .month-report-card {
-  margin-top: 1rem;
+  margin-top: 0;
 }
 
 .month-report-empty {
-  margin-top: 1rem;
+  margin-top: 0;
   padding: 1rem 1.1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(24, 48, 71, 0.09);
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(200, 139, 74, 0.18);
   border-radius: 1.1rem;
   color: var(--muted);
 }
@@ -243,6 +598,80 @@ tbody tr:hover {
 }
 
 @media (max-width: 960px) {
+  .assignment-detail-layout {
+    display: block;
+  }
+
+  .assignment-page-nav {
+    top: 5.75rem;
+    width: auto;
+    margin-bottom: 1rem;
+  }
+
+  .assignment-page-nav-inner {
+    width: auto;
+    display: flex;
+    align-items: stretch;
+    gap: 0.45rem;
+    overflow-x: auto;
+    padding: 0.65rem;
+    border-radius: 1rem;
+    scroll-padding-inline: 0.65rem;
+  }
+
+  .assignment-page-nav:hover .assignment-page-nav-inner,
+  .assignment-page-nav:focus-within .assignment-page-nav-inner {
+    width: auto;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .assignment-page-nav-title,
+  .assignment-page-nav-group-title {
+    display: none;
+  }
+
+  .assignment-page-nav-group {
+    display: contents;
+  }
+
+  .assignment-page-nav-month {
+    flex: 0 0 auto;
+    min-width: 8.5rem;
+  }
+
+  .assignment-page-nav-link {
+    margin-top: 0;
+    padding: 0.55rem 0.7rem;
+    white-space: nowrap;
+  }
+
+  .assignment-page-nav-sublist {
+    display: flex;
+    gap: 0.25rem;
+    margin: 0.25rem 0 0;
+    padding-right: 0;
+    border-right: 0;
+  }
+
+  .assignment-page-nav-sublink {
+    margin-top: 0;
+    padding: 0.18rem 0.45rem;
+    white-space: nowrap;
+  }
+
+  .assignment-page-nav-link--month small {
+    white-space: nowrap;
+  }
+
+  .assignment-page-nav-link.is-active::before {
+    top: auto;
+    right: 0.7rem;
+    bottom: 0.2rem;
+    left: 0.7rem;
+    width: auto;
+    height: 0.18rem;
+  }
+
   .assignment-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -250,6 +679,7 @@ tbody tr:hover {
 
 @media (max-width: 640px) {
   .assignment-summary,
+  .assignment-actions-bar,
   .assignment-actions {
     grid-template-columns: 1fr;
     display: grid;
@@ -267,8 +697,19 @@ tbody tr:hover {
     width: 100%;
   }
 
+  .subsection-title--with-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .subsection-title--with-actions .assignment-actions {
+    justify-content: stretch;
+  }
+
   .month-report-empty,
-  .report-card-header {
+  .report-card-header,
+  .month-block-header,
+  .progress-updates-header {
     flex-direction: column;
     align-items: stretch;
   }
