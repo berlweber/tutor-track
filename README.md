@@ -1,4 +1,4 @@
-![screenshot from app](./tutoring/static/images/Screenshot_of_app.png?raw=true "")
+![screenshot from app](./tutoring/static/images/tutorTrack_screenshot.png?raw=true "")
 
 # Tutor Track
 
@@ -10,10 +10,7 @@ I built this project to practice building a full CRUD web application with Djang
 
 ## Getting Started
 Deployed app:  
-https://tutor-track-9c7f1aa7eb60.herokuapp.com/
-
-Planning materials:  
-https://trello.com/b/rLWE4i8g/tutoring-program-manager-django-crud-app-project
+https://tutor-track-demo-fe7315d541fe.herokuapp.com/assignments/106/
 
 Main features:
 - Create, view, update, and delete assignments
