@@ -10,7 +10,7 @@ I built this project to practice building a full CRUD web application with Djang
 
 ## Getting Started
 Deployed app:  
-https://tutor-track-demo-fe7315d541fe.herokuapp.com/assignments/106/
+https://tutor-track-demo-fe7315d541fe.herokuapp.com/
 
 Main features:
 - Create, view, update, and delete assignments
